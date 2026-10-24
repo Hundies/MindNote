@@ -142,6 +142,7 @@ h1{font-family:'Playfair Display',Georgia,serif;font-size:36px;margin:0;font-wei
 .it-w{font-size:11px;color:var(--redd);font-weight:700}
 .dot{width:8px;height:8px;border-radius:50%;background:#E3E6E4}
 .dot.k{background:var(--g2)}
+.dot.u{background:var(--red)}
 
 /* 학습 */
 .st-top{display:flex;align-items:center;justify-content:space-between;padding:12px 16px}
@@ -405,17 +406,23 @@ function load(){
     const en=uid(),ec=uid(),t=Date.now();
     S.cats=[{id:en,name:'영어단어'},{id:ec,name:'경제용어'}];
     S.cards=[
-      {id:uid(),catId:en,type:'card',front:'abundant',back:'풍부한',note:'',known:false,created:t-4},
-      {id:uid(),catId:en,type:'cloze',text:'The harvest was [abundant] this year.',note:'올해 수확이 풍부했다.',known:false,created:t-3},
-      {id:uid(),catId:ec,type:'card',front:'인플레이션',back:'물가가 지속적으로 오르는 현상',note:'',known:false,created:t-2},
-      {id:uid(),catId:ec,type:'cloze',text:'[기준금리]가 오르면 대출 이자 부담이 [늘어난다].',note:'',known:false,created:t-1}
+      {id:uid(),catId:en,type:'card',front:'abundant',back:'풍부한',note:'',known:null,created:t-4},
+      {id:uid(),catId:en,type:'cloze',text:'The harvest was [abundant] this year.',note:'올해 수확이 풍부했다.',known:null,created:t-3},
+      {id:uid(),catId:ec,type:'card',front:'인플레이션',back:'물가가 지속적으로 오르는 현상',note:'',known:null,created:t-2},
+      {id:uid(),catId:ec,type:'cloze',text:'[기준금리]가 오르면 대출 이자 부담이 [늘어난다].',note:'',known:null,created:t-1}
     ];
     save();
   }
+  // 예전 데이터: 모름을 누른 적 없는 '모름'은 '아직 안 품'으로 옮김
+  let mig=false;
+  S.cards.forEach(c=>{if(c.known===false&&!(c.wrong>0)){c.known=null;mig=true}});
+  if(mig)save();
 }
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){toast('저장 실패')}}
 function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(()=>t.classList.remove('on'),1600)}
 const inCur=c=>c.catId===cur;
+// 상태: known===true 알아요 / known===false 모름(학습 중 모름 누름) / null 아직 안 품
+const isK=c=>c.known===true,isU=c=>c.known===false;
 const catName=id=>(S.cats.find(x=>x.id===id)||{}).name||'미분류';
 const pct=(a,b)=>b?Math.round(a/b*100):0;
 function clozeHTML(text,mode){
@@ -454,12 +461,12 @@ function renderHome(){
   $('#gtip').classList.toggle('hide',!S.cats.length);
   if(!S.cats.length){$('#grid').innerHTML='<div class="empty">카테고리가 없어요<br>오른쪽 위 + 를 눌러 추가하세요</div>';return}
   $('#grid').innerHTML=S.cats.map(c=>{
-    const l=S.cards.filter(x=>x.catId===c.id),k=l.filter(x=>x.known).length;
+    const l=S.cards.filter(x=>x.catId===c.id),k=l.filter(isK).length,u=l.filter(isU).length;
     return `<div class="tw sw-row" data-id="${c.id}"><div class="clip">${ACTS}
       <div class="tile sw-c">
         <div class="t-row"><div class="t-name">${esc(c.name)}</div><div class="t-cnt">${l.length}장</div></div>
         <div class="t-bar"><i style="width:${pct(k,l.length)}%"></i></div>
-        <div class="t-sub">알아요 ${k} · 모름 ${l.length-k}</div>
+        <div class="t-sub">알아요 ${k} · 모름 ${u}</div>
       </div></div></div>`;
   }).join('');
 }
@@ -651,18 +658,18 @@ function renderDeck(){
   if(cur===null)return;
   if(!S.cats.some(c=>c.id===cur)){closeDeck();return}
   $('#dkTitle').textContent=catName(cur);
-  const l=S.cards.filter(inCur),k=l.filter(c=>c.known).length;
-  $('#sTotal').textContent=l.length;$('#sKnown').textContent=k;$('#sUnknown').textContent=l.length-k;
+  const l=S.cards.filter(inCur),k=l.filter(isK).length;
+  $('#sTotal').textContent=l.length;$('#sKnown').textContent=k;$('#sUnknown').textContent=l.filter(isU).length;
   document.querySelectorAll('#stats .stat').forEach(b=>b.classList.toggle('on',b.dataset.f===filter));
   document.querySelectorAll('.opt').forEach(b=>b.classList.toggle('on',!!S.opt[b.dataset.o]));
-  const list=l.filter(c=>filter==='all'||(filter==='known'?c.known:!c.known)).sort((a,b)=>b.created-a.created);
+  const list=l.filter(c=>filter==='all'||(filter==='known'?isK(c):isU(c))).sort((a,b)=>b.created-a.created);
   if(!list.length){$('#list').innerHTML=`<div class="empty">${filter==='all'?'아직 카드가 없어요<br>오른쪽 위 + 를 눌러 추가하세요':'해당하는 카드가 없어요'}</div>`;return}
   $('#list').innerHTML=list.map(c=>`<div class="sw-row it-row" data-id="${c.id}"><div class="clip">${ACTS}${itemHTML(c,false,'sw-c')}</div></div>`).join('');
 }
 function itemHTML(c,showCat,cls=''){
   return `<div class="item ${cls}" data-id="${c.id}">
     <div class="it-main">${c.type==='card'?`<div class="it-q">${esc(c.front)}</div><div class="it-a">${esc(c.back)}</div>`:`<div class="it-q">${clozeHTML(c.text,'list')}</div>`}${c.note?`<div class="it-note">${esc(c.note)}</div>`:''}</div>
-    <div class="it-side"><span class="badge ${c.type}">${c.type==='card'?'카드':'빈칸'}</span>${showCat?`<span class="it-cat">${esc(catName(c.catId))}</span>`:''}${c.wrong?`<span class="it-w">틀림 ${c.wrong}</span>`:''}<span class="dot${c.known?' k':''}"></span></div>
+    <div class="it-side"><span class="badge ${c.type}">${c.type==='card'?'카드':'빈칸'}</span>${showCat?`<span class="it-cat">${esc(catName(c.catId))}</span>`:''}${c.wrong?`<span class="it-w">틀림 ${c.wrong}</span>`:''}<span class="dot${isK(c)?' k':isU(c)?' u':''}"></span></div>
   </div>`;
 }
 function renderAll(){if(openTw&&!document.contains(openTw))openTw=null;renderHome();renderStats();renderSearch();renderDeck();openTw=null;openX=0}
@@ -670,7 +677,7 @@ function renderAll(){if(openTw&&!document.contains(openTw))openTw=null;renderHom
 $('#backBtn').onclick=closeDeck;
 $('#stats').onclick=e=>{const b=e.target.closest('.stat');if(!b)return;filter=b.dataset.f;renderDeck()};
 $('#opts').onclick=e=>{const b=e.target.closest('.opt');if(!b)return;S.opt[b.dataset.o]=!S.opt[b.dataset.o];save();renderDeck()};
-function resetRec(c){c.known=false;c.right=0;c.wrong=0}
+function resetRec(c){c.known=null;c.right=0;c.wrong=0}
 
 /* ---------- 하단 탭 ---------- */
 $('#tabbar').onclick=e=>{
@@ -697,19 +704,19 @@ function detailHTML(l){
     ${top.length?top.map(c=>`<div class="wl"><span>${cardTitle(c)}</span><b>${c.wrong}회</b></div>`).join(''):'<div class="none">아직 틀린 카드가 없어요</div>'}`;
 }
 function renderStats(){
-  const all=S.cards,k=all.filter(c=>c.known).length,p=pct(k,all.length);
+  const all=S.cards,k=all.filter(isK).length,p=pct(k,all.length);
   $('#statAll').innerHTML=`<div class="sum">
     <div class="sum-top"><div><span>전체 암기율</span><br><b>${p}%</b></div><span>카테고리 ${S.cats.length}개</span></div>
     <div class="t-bar"><i style="width:${p}%"></i></div>
-    <div class="stats"><div class="stat"><b>${all.length}</b><small>전체</small></div><div class="stat k"><b>${k}</b><small>알아요</small></div><div class="stat u"><b>${all.length-k}</b><small>모름</small></div></div>
+    <div class="stats"><div class="stat"><b>${all.length}</b><small>전체</small></div><div class="stat k"><b>${k}</b><small>알아요</small></div><div class="stat u"><b>${all.filter(isU).length}</b><small>모름</small></div></div>
     <div class="sum-in">${detailHTML(all)}</div>
   </div>`;
   $('#statCats').innerHTML=S.cats.length?S.cats.map(c=>{
-    const l=all.filter(x=>x.catId===c.id),kk=l.filter(x=>x.known).length,pp=pct(kk,l.length);
+    const l=all.filter(x=>x.catId===c.id),kk=l.filter(isK).length,uu=l.filter(isU).length,pp=pct(kk,l.length);
     return `<div class="srow${openStat.has(c.id)?' open':''}" data-id="${c.id}">
       <button class="srow-h"><div class="t-row"><div class="t-name">${esc(c.name)}</div><div class="t-cnt" style="color:var(--gd);font-weight:700">${pp}%<span class="chev">▾</span></div></div>
         <div class="t-bar"><i style="width:${pp}%"></i></div>
-        <div class="t-sub"><span>${l.length}장</span><span>알아요 ${kk} · 모름 ${l.length-kk}</span></div></button>
+        <div class="t-sub"><span>${l.length}장</span><span>알아요 ${kk} · 모름 ${uu}</span></div></button>
       <div class="srow-d"><div><div class="srow-in">${detailHTML(l)}</div></div></div>
     </div>`;
   }).join(''):'<div class="empty">카테고리가 없어요</div>';
@@ -763,7 +770,7 @@ $('#importFile').onchange=e=>{
 let Q=[],qi=0,wrongList=[],right=0,revealed=false;
 function startStudy(cards){
   let q=cards?cards.slice():S.cards.filter(inCur);
-  if(!cards&&S.opt.onlyUnknown)q=q.filter(c=>!c.known);
+  if(!cards&&S.opt.onlyUnknown)q=q.filter(isU);
   if(!q.length){toast(S.opt.onlyUnknown?'모르는 카드가 없어요':'카드가 없어요');return}
   if(S.opt.shuffle)shuffle(q);
   Q=q;qi=0;wrongList=[];right=0;
@@ -1058,7 +1065,7 @@ function saveCard(next){
     const {ok,bad}=parseBulk($('#inBulk').value);
     if(!ok.length){toast('추가할 줄이 없어요');return}
     const t=Date.now();
-    ok.forEach((x,i)=>S.cards.push({id:uid(),created:t+i,known:false,catId,note:'',...x}));
+    ok.forEach((x,i)=>S.cards.push({id:uid(),created:t+i,known:null,catId,note:'',...x}));
     S.lastCat=catId;save();renderAll();closeSheets();
     toast(`${ok.length}장 추가됨${bad?` (${bad}줄 건너뜀)`:''}`);return;
   }
@@ -1071,7 +1078,7 @@ function saveCard(next){
     if(!/\[[^\]]+\]/.test(d.text)){toast('정답 부분을 [ ]로 감싸주세요');return}
   }
   if(editId)Object.assign(S.cards.find(x=>x.id===editId),d);
-  else S.cards.push({id:uid(),created:Date.now(),known:false,...d});
+  else S.cards.push({id:uid(),created:Date.now(),known:null,...d});
   S.lastType=ftype;S.lastCat=catId;save();renderAll();
   if(next){
     ['#inFront','#inBack','#inText','#inNote'].forEach(s=>$(s).value='');updPrev();

@@ -37,18 +37,27 @@ h1{font-family:'Playfair Display',Georgia,serif;font-size:36px;margin:0;font-wei
 
 /* 카테고리 칸 */
 #grid{display:flex;flex-direction:column;gap:12px;padding:10px 16px;position:relative}
-.tw{position:relative;border-radius:16px;transition:transform .22s ease;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;touch-action:pan-y}
-.tw .clip{position:relative;border-radius:16px;overflow:hidden}
-.tdel{position:absolute;top:0;right:0;bottom:0;width:100%;border:0;background:var(--red);color:#fff;font-size:15px;font-weight:700;display:flex;align-items:center;justify-content:flex-end;padding-right:24px;border-radius:16px}
+.tw{position:relative;border-radius:16px;transition:transform .22s ease}
+.sw-row{position:relative;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;touch-action:pan-y}
+.sw-row .clip{position:relative;border-radius:16px;overflow:hidden;transition:transform .2s,box-shadow .2s}
+.sw-c{position:relative;z-index:2}
+.act{position:absolute;top:0;bottom:0;width:100%;border:0;color:#fff;font-size:15px;font-weight:700;display:flex;align-items:center;opacity:0;pointer-events:none;z-index:1}
+.act.a-del{right:0;background:var(--red);justify-content:flex-end;padding-right:24px}
+.act.a-edit{left:0;background:var(--g2);justify-content:flex-start;padding-left:24px}
+.sw-row.swL .act.a-del,.sw-row.swR .act.a-edit{opacity:1;pointer-events:auto}
 .tile{position:relative;width:100%;border:1px solid var(--line);background:#fff;border-radius:16px;padding:16px;text-align:left;color:var(--tx);display:flex;flex-direction:column;gap:8px;transition:transform .28s cubic-bezier(.2,.8,.2,1)}
 .tw.lift{z-index:3;transition:none}
 .tw.lift .clip{transform:scale(1.03);box-shadow:0 14px 34px rgba(40,90,60,.2);transition:transform .18s,box-shadow .18s}
 .tw.lift .tile{border-color:var(--g)}
-.tw .clip{transition:transform .2s,box-shadow .2s}
-.tdel{opacity:0}
-.tw.sw .tdel{opacity:1}
-.tw.lift .tdel{visibility:hidden}
+.tw.lift .act{visibility:hidden}
 .tw.settle{transition:transform .2s ease}
+.it-row{border-bottom:1px solid var(--line)}
+.it-row .clip{border-radius:12px}
+.it-row .item{border-bottom:0;background:#fff;padding:14px 6px;transition:transform .28s cubic-bezier(.2,.8,.2,1)}
+.cs-btns{display:flex;flex-direction:column;gap:8px;margin-top:18px}
+.cs-btns button{border:1px solid var(--line);background:#fff;border-radius:14px;padding:14px;text-align:left;font-size:16px;color:var(--tx);display:flex;flex-direction:column;gap:3px}
+.cs-btns button span{font-size:12px;color:var(--sub)}
+.cs-btns .red{color:var(--redd)}
 .t-row{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
 .t-name{font-size:17px;font-weight:800;word-break:break-word}
 .t-cnt{font-size:13px;color:var(--sub);flex:none}
@@ -131,8 +140,6 @@ h1{font-family:'Playfair Display',Georgia,serif;font-size:36px;margin:0;font-wei
 .it-w{font-size:11px;color:var(--redd);font-weight:700}
 .dot{width:8px;height:8px;border-radius:50%;background:#E3E6E4}
 .dot.k{background:var(--g2)}
-.dk-foot{display:flex;gap:8px;padding:20px 16px 30px}
-.dk-foot button{flex:1;border:1px solid var(--line);background:#fff;border-radius:12px;padding:11px 4px;font-size:13px;color:var(--sub)}
 
 /* 학습 */
 .st-top{display:flex;align-items:center;justify-content:space-between;padding:12px 16px}
@@ -209,7 +216,7 @@ textarea:focus,input:focus,select:focus{border-color:var(--g2);background:#fff}
 <!-- 탭1: 카드 -->
 <main class="page on" id="pgCards">
   <div id="grid"></div>
-  <div class="gtip" id="gtip">왼쪽으로 밀면 삭제 · 길게 눌러 순서 변경</div>
+  <div class="gtip" id="gtip">오른쪽으로 밀면 편집 · 왼쪽으로 밀면 삭제 · 길게 눌러 순서 변경</div>
 </main>
 
 <!-- 탭2: 통계 -->
@@ -277,10 +284,7 @@ textarea:focus,input:focus,select:focus{border-color:var(--g2);background:#fff}
     </div>
   </section>
   <div id="list"></div>
-  <div class="dk-foot">
-    <button id="resetKnown">기록 초기화</button>
-    <button id="renameDeck">이름 변경</button>
-  </div>
+  <div class="gtip" style="padding:14px 16px 24px">오른쪽으로 밀면 편집 · 왼쪽으로 밀면 삭제</div>
 </div>
 
 <!-- 하단 탭 -->
@@ -348,6 +352,23 @@ textarea:focus,input:focus,select:focus{border-color:var(--g2);background:#fff}
     <select id="inCat"></select>
     <button class="btn ghost wide" id="saveNextBtn">저장하고 계속 추가</button>
     <button class="del" id="delBtn">이 카드 삭제</button>
+  </div>
+</div>
+
+<!-- 카테고리 편집 -->
+<div class="sheet-wrap" id="catSheet">
+  <div class="sheet">
+    <div class="sheet-head">
+      <button class="tbtn" data-close>취소</button>
+      <b>카테고리 편집</b>
+      <button class="tbtn save" id="csSave">저장</button>
+    </div>
+    <label for="csName">이름</label>
+    <input id="csName" type="text" enterkeyhint="done">
+    <div class="cs-btns">
+      <button id="csReset">기록 초기화<span>카드는 두고 알아요/모름·틀린 횟수만 지움</span></button>
+      <button id="csWipe" class="red">카드 전체 삭제<span>카테고리는 두고 안의 카드만 모두 삭제</span></button>
+    </div>
   </div>
 </div>
 
@@ -426,14 +447,14 @@ $('#askSheet').addEventListener('click',e=>{if(e.target.id==='askSheet')askEnd(f
 $('#askIn').onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();askEnd(true)}};
 
 /* ---------- 탭1: 카테고리 칸 ---------- */
+const ACTS='<button class="act a-del" tabindex="-1">삭제</button><button class="act a-edit" tabindex="-1">편집</button>';
 function renderHome(){
   $('#gtip').classList.toggle('hide',!S.cats.length);
   if(!S.cats.length){$('#grid').innerHTML='<div class="empty">카테고리가 없어요<br>오른쪽 위 + 를 눌러 추가하세요</div>';return}
   $('#grid').innerHTML=S.cats.map(c=>{
     const l=S.cards.filter(x=>x.catId===c.id),k=l.filter(x=>x.known).length;
-    return `<div class="tw" data-id="${c.id}"><div class="clip">
-      <button class="tdel" tabindex="-1">삭제</button>
-      <div class="tile">
+    return `<div class="tw sw-row" data-id="${c.id}"><div class="clip">${ACTS}
+      <div class="tile sw-c">
         <div class="t-row"><div class="t-name">${esc(c.name)}</div><div class="t-cnt">${l.length}장</div></div>
         <div class="t-bar"><i style="width:${pct(k,l.length)}%"></i></div>
         <div class="t-sub">알아요 ${k} · 모름 ${l.length-k}</div>
@@ -444,39 +465,79 @@ $('#addBtn').onclick=async()=>{
   const n=await ask({title:'새 카테고리',input:true,placeholder:'예: 영어단어',okText:'추가'});if(!n)return;
   S.cats.push({id:uid(),name:n});save();renderAll();toast('추가됨');
 };
+function collapse(row,fin){
+  if(!row){fin();return}
+  const h=row.offsetHeight;
+  row.style.transition='opacity .2s, height .25s .15s, margin .25s .15s';row.style.height=h+'px';row.style.overflow='hidden';
+  requestAnimationFrame(()=>{row.style.opacity='0';row.style.height='0';if(row.classList.contains('tw'))row.style.marginBottom='-12px'});
+  setTimeout(fin,420);
+}
 async function deleteCat(id){
   const c=S.cats.find(x=>x.id===id);if(!c)return;
   const n=S.cards.filter(x=>x.catId===id).length;
   const ok=await ask({title:'카테고리 삭제',msg:`'${c.name}' 카테고리${n?`와 카드 ${n}장을`:'를'} 삭제할까요?`,okText:'삭제',danger:true});
   if(!ok){closeSwipe();return}
-  const tw=document.querySelector(`.tw[data-id="${id}"]`);
-  const fin=()=>{S.cats=S.cats.filter(x=>x.id!==id);S.cards=S.cards.filter(x=>x.catId!==id);save();renderAll();toast('삭제됨')};
-  if(tw){
-    const h=tw.offsetHeight;
-    tw.style.transition='opacity .2s, height .25s .15s, margin .25s .15s';tw.style.height=h+'px';tw.style.overflow='hidden';
-    requestAnimationFrame(()=>{tw.style.opacity='0';tw.style.height='0';tw.style.marginBottom='-12px'});
-    setTimeout(fin,420);
-  }else fin();
+  collapse(document.querySelector(`#grid .tw[data-id="${id}"]`),()=>{S.cats=S.cats.filter(x=>x.id!==id);S.cards=S.cards.filter(x=>x.catId!==id);openTw=null;save();renderAll();toast('삭제됨')});
+}
+async function deleteCardRow(id){
+  const ok=await ask({title:'카드 삭제',msg:'이 카드를 삭제할까요?',okText:'삭제',danger:true});
+  if(!ok){closeSwipe();return}
+  collapse(document.querySelector(`#list .it-row[data-id="${id}"]`),()=>{S.cards=S.cards.filter(x=>x.id!==id);openTw=null;save();renderAll();toast('삭제됨')});
 }
 
-/* ---- 제스처: 왼쪽 스와이프 삭제 / 길게 눌러 드래그 ---- */
-const SW=88;           // 삭제 버튼 폭
-let G=null,openTw=null,blockClick=false;
-const tileOf=tw=>tw.querySelector('.tile');
-function setX(tw,x,anim){
-  const t=tileOf(tw);t.style.transition=anim?'':'none';t.style.transform=x?`translateX(${x}px)`:'';
-  clearTimeout(tw._swT);
-  if(x<0)tw.classList.add('sw');
-  else tw._swT=setTimeout(()=>tw.classList.remove('sw'),anim?300:0);
+/* 카테고리 편집 창 */
+let csId=null;
+function openCatEdit(id){
+  const c=S.cats.find(x=>x.id===id);if(!c)return;
+  csId=id;$('#csName').value=c.name;
+  const n=S.cards.filter(x=>x.catId===id).length;
+  $('#csWipe').querySelector('span').textContent=`카테고리는 두고 안의 카드 ${n}장을 모두 삭제`;
+  $('#catSheet').classList.add('open');
 }
-function closeSwipe(){if(openTw){setX(openTw,0,true);openTw=null}}
+function closeCatEdit(){document.activeElement&&document.activeElement.blur();$('#catSheet').classList.remove('open');csId=null}
+$('#catSheet').addEventListener('click',e=>{if(e.target.id==='catSheet'||e.target.closest('[data-close]'))closeCatEdit()});
+$('#csSave').onclick=()=>{
+  const c=S.cats.find(x=>x.id===csId);if(!c)return closeCatEdit();
+  const n=$('#csName').value.trim();if(!n){toast('이름을 입력하세요');return}
+  c.name=n;save();closeCatEdit();renderAll();toast('저장됨');
+};
+$('#csName').onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();$('#csSave').click()}};
+$('#csReset').onclick=async()=>{
+  const id=csId;if(!await ask({title:'기록 초기화',msg:`'${catName(id)}' 카드의 알아요/모름·틀린 횟수를 초기화할까요?`,okText:'초기화',danger:true}))return;
+  S.cards.filter(x=>x.catId===id).forEach(resetRec);save();closeCatEdit();renderAll();toast('초기화됨');
+};
+$('#csWipe').onclick=async()=>{
+  const id=csId,n=S.cards.filter(x=>x.catId===id).length;
+  if(!n){toast('삭제할 카드가 없어요');return}
+  if(!await ask({title:'카드 전체 삭제',msg:`'${catName(id)}'의 카드 ${n}장을 모두 삭제할까요? 되돌릴 수 없어요.`,okText:'삭제',danger:true}))return;
+  S.cards=S.cards.filter(x=>x.catId!==id);save();closeCatEdit();renderAll();toast('삭제됨');
+};
+
+/* ---- 제스처: 오른쪽=편집 / 왼쪽=삭제 / 길게 눌러 순서 변경(카테고리) ---- */
+const SW=88;           // 버튼 폭
+let G=null,openTw=null,openX=0,blockClick=false;
+const contentOf=r=>r.querySelector('.sw-c');
+function setX(r,x,anim){
+  const t=contentOf(r);t.style.transition=anim?'':'none';t.style.transform=x?`translateX(${x}px)`:'';
+  clearTimeout(r._swT);
+  if(x<0){r.classList.add('swL');r.classList.remove('swR')}
+  else if(x>0){r.classList.add('swR');r.classList.remove('swL')}
+  else r._swT=setTimeout(()=>r.classList.remove('swL','swR'),anim?300:0);
+}
+function closeSwipe(){if(openTw){setX(openTw,0,true);openTw=null;openX=0}}
+function openRow(r,x){setX(r,x,true);openTw=r;openX=x}
+function rowAction(r,kind){
+  const id=r.dataset.id,isCat=r.classList.contains('tw');
+  if(kind==='del')isCat?deleteCat(id):deleteCardRow(id);
+  else{closeSwipe();isCat?openCatEdit(id):openCard(id)}
+}
 
 function gStart(x,y,target){
-  const tw=target.closest('.tw');if(!tw||G)return;
-  if(target.closest('.tdel'))return;
-  if(openTw&&openTw!==tw)closeSwipe();
-  G={tw,x0:x,y0:y,mode:null,base:openTw===tw?-SW:0,dx:0,dy:0};
-  G.timer=setTimeout(()=>{if(G&&!G.mode)dragStart()},380);
+  const r=target.closest('.sw-row');if(!r||G)return;
+  if(target.closest('.act'))return;
+  if(openTw&&openTw!==r)closeSwipe();
+  G={tw:r,x0:x,y0:y,mode:null,base:openTw===r?openX:0,dx:0,dy:0};
+  if(r.classList.contains('tw'))G.timer=setTimeout(()=>{if(G&&!G.mode)dragStart()},380);
 }
 function gMove(x,y,e){
   if(!G)return;
@@ -484,14 +545,14 @@ function gMove(x,y,e){
   if(!G.mode){
     if(Math.abs(G.dx)<8&&Math.abs(G.dy)<8)return;
     clearTimeout(G.timer);
-    if(Math.abs(G.dx)>Math.abs(G.dy)&&(G.dx<0||G.base)){G.mode='swipe';blockClick=true}
+    if(Math.abs(G.dx)>Math.abs(G.dy)){G.mode='swipe';blockClick=true}
     else{G=null;return}       // 세로 = 스크롤
   }
   if(e.cancelable)e.preventDefault();
   if(G.mode==='swipe'){
     let nx=G.base+G.dx;
-    if(nx>0)nx=0;
     if(nx<-SW)nx=-SW+(nx+SW)*0.5;   // 끝에서 살짝 저항
+    if(nx>SW)nx=SW+(nx-SW)*0.5;
     setX(G.tw,nx,false);
   }else if(G.mode==='drag')dragMove();
 }
@@ -500,10 +561,13 @@ function gEnd(){
   clearTimeout(G.timer);
   const g=G;G=null;
   if(g.mode==='swipe'){
-    const nx=g.base+g.dx;
-    if(nx<-SW*1.9){setX(g.tw,-SW,true);openTw=g.tw;deleteCat(g.tw.dataset.id)}
-    else if(nx<-SW/2){setX(g.tw,-SW,true);openTw=g.tw}
-    else{setX(g.tw,0,true);if(openTw===g.tw)openTw=null}
+    let nx=g.base+g.dx;
+    if(nx<-SW)nx=-SW+(nx+SW)*0.5;if(nx>SW)nx=SW+(nx-SW)*0.5;
+    if(nx<-SW*1.5){openRow(g.tw,-SW);rowAction(g.tw,'del')}
+    else if(nx<-SW/2)openRow(g.tw,-SW);
+    else if(nx>SW*1.5){openRow(g.tw,SW);setTimeout(()=>rowAction(g.tw,'edit'),180)}
+    else if(nx>SW/2)openRow(g.tw,SW);
+    else{setX(g.tw,0,true);if(openTw===g.tw){openTw=null;openX=0}}
   }else if(g.mode==='drag')dragEnd(g);
   setTimeout(()=>blockClick=false,50);
 }
@@ -541,7 +605,6 @@ function dragMove(){
 }
 function dragEnd(g){
   const {tws,i,t,tops,hs,gap}=D;
-  // 놓일 자리로 부드럽게 이동
   let target=0;
   if(t>i)for(let j=i+1;j<=t;j++)target+=hs[j]+gap;
   else if(t<i)for(let j=t;j<i;j++)target-=hs[j]+gap;
@@ -554,30 +617,34 @@ function dragEnd(g){
   },210);
 }
 
-const grid=$('#grid');
-grid.addEventListener('touchstart',e=>{const p=e.touches[0];gStart(p.clientX,p.clientY,e.target)},{passive:true});
+const grid=$('#grid'),listEl=$('#list');
+[grid,listEl].forEach(el=>{
+  el.addEventListener('touchstart',e=>{const p=e.touches[0];gStart(p.clientX,p.clientY,e.target)},{passive:true});
+  el.addEventListener('mousedown',e=>{mouseDown=true;gStart(e.clientX,e.clientY,e.target)});
+  el.addEventListener('contextmenu',e=>{if(e.target.closest('.sw-row'))e.preventDefault()});
+});
 document.addEventListener('touchmove',e=>{if(!G)return;const p=e.touches[0];gMove(p.clientX,p.clientY,e)},{passive:false});
 document.addEventListener('touchend',gEnd);
 document.addEventListener('touchcancel',gEnd);
-// 데스크톱(마우스)
 let mouseDown=false;
-grid.addEventListener('mousedown',e=>{mouseDown=true;gStart(e.clientX,e.clientY,e.target)});
 window.addEventListener('mousemove',e=>{if(mouseDown)gMove(e.clientX,e.clientY,e)});
 window.addEventListener('mouseup',()=>{if(mouseDown){mouseDown=false;gEnd()}});
-grid.addEventListener('contextmenu',e=>{if(e.target.closest('.tw'))e.preventDefault()});
 
-grid.addEventListener('click',e=>{
+function rowClick(e,onTap){
   if(blockClick)return;
-  const tw=e.target.closest('.tw');if(!tw)return;
-  if(e.target.closest('.tdel')){deleteCat(tw.dataset.id);return}
+  const r=e.target.closest('.sw-row');if(!r)return;
+  const a=e.target.closest('.act');
+  if(a){rowAction(r,a.classList.contains('a-del')?'del':'edit');return}
   if(openTw){closeSwipe();return}
-  openDeck(tw.dataset.id);
-});
-document.addEventListener('click',e=>{if(openTw&&!e.target.closest('.tw')&&!e.target.closest('#askSheet'))closeSwipe()});
+  onTap(r.dataset.id);
+}
+grid.addEventListener('click',e=>rowClick(e,openDeck));
+listEl.addEventListener('click',e=>rowClick(e,openCard));
+document.addEventListener('click',e=>{if(openTw&&!e.target.closest('.sw-row')&&!e.target.closest('#askSheet'))closeSwipe()});
 
 /* ---------- 카테고리 상세 ---------- */
 function openDeck(id){cur=id;filter='all';$('#deck').classList.add('open');$('#deck').scrollTop=0;renderDeck()}
-function closeDeck(){cur=null;$('#deck').classList.remove('open');renderAll()}
+function closeDeck(){cur=null;closeSwipe();$('#deck').classList.remove('open');renderAll()}
 function renderDeck(){
   if(cur===null)return;
   if(!S.cats.some(c=>c.id===cur)){closeDeck();return}
@@ -588,29 +655,19 @@ function renderDeck(){
   document.querySelectorAll('.opt').forEach(b=>b.classList.toggle('on',!!S.opt[b.dataset.o]));
   const list=l.filter(c=>filter==='all'||(filter==='known'?c.known:!c.known)).sort((a,b)=>b.created-a.created);
   if(!list.length){$('#list').innerHTML=`<div class="empty">${filter==='all'?'아직 카드가 없어요<br>오른쪽 위 + 를 눌러 추가하세요':'해당하는 카드가 없어요'}</div>`;return}
-  $('#list').innerHTML=list.map(c=>itemHTML(c,false)).join('');
+  $('#list').innerHTML=list.map(c=>`<div class="sw-row it-row" data-id="${c.id}"><div class="clip">${ACTS}${itemHTML(c,false,'sw-c')}</div></div>`).join('');
 }
-function itemHTML(c,showCat){
-  return `<div class="item" data-id="${c.id}">
+function itemHTML(c,showCat,cls=''){
+  return `<div class="item ${cls}" data-id="${c.id}">
     <div class="it-main">${c.type==='card'?`<div class="it-q">${esc(c.front)}</div><div class="it-a">${esc(c.back)}</div>`:`<div class="it-q">${clozeHTML(c.text,'list')}</div>`}${c.note?`<div class="it-note">${esc(c.note)}</div>`:''}</div>
     <div class="it-side"><span class="badge ${c.type}">${c.type==='card'?'카드':'빈칸'}</span>${showCat?`<span class="it-cat">${esc(catName(c.catId))}</span>`:''}${c.wrong?`<span class="it-w">틀림 ${c.wrong}</span>`:''}<span class="dot${c.known?' k':''}"></span></div>
   </div>`;
 }
-function renderAll(){renderHome();renderStats();renderSearch();renderDeck()}
+function renderAll(){if(openTw&&!document.contains(openTw))openTw=null;renderHome();renderStats();renderSearch();renderDeck();openTw=null;openX=0}
 
 $('#backBtn').onclick=closeDeck;
 $('#stats').onclick=e=>{const b=e.target.closest('.stat');if(!b)return;filter=b.dataset.f;renderDeck()};
 $('#opts').onclick=e=>{const b=e.target.closest('.opt');if(!b)return;S.opt[b.dataset.o]=!S.opt[b.dataset.o];save();renderDeck()};
-$('#list').onclick=e=>{const it=e.target.closest('.item');if(it)openCard(it.dataset.id)};
-$('#resetKnown').onclick=async()=>{
-  if(!await ask({title:'기록 초기화',msg:`'${catName(cur)}' 카드의 알아요/모름·틀린 횟수를 초기화할까요?`,okText:'초기화',danger:true}))return;
-  S.cards.filter(inCur).forEach(resetRec);save();renderAll();toast('초기화됨');
-};
-$('#renameDeck').onclick=async()=>{
-  const c=S.cats.find(x=>x.id===cur);if(!c)return;
-  const n=await ask({title:'이름 변경',input:true,value:c.name,okText:'저장'});if(!n)return;
-  c.name=n;save();renderAll();
-};
 function resetRec(c){c.known=false;c.right=0;c.wrong=0}
 
 /* ---------- 하단 탭 ---------- */

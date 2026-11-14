@@ -108,6 +108,41 @@ h1{font-family:'Playfair Display',Georgia,serif;font-size:36px;margin:0;font-wei
 .set-list.row2{flex-direction:row}
 .set-list.row2 button{flex:1;min-width:0}
 #searchRes{padding:4px 16px 0}
+/* 암산 */
+#pgCalc .seg{margin:4px 16px 14px}
+.mc-sub{font-size:13px;color:var(--sub);padding:0 16px 10px;line-height:1.6}
+.mc-lv{display:flex;gap:6px;padding:0 16px 12px}
+.mc-lv button{border:1px solid #d5ebde;background:#fff;color:var(--sub);border-radius:999px;padding:7px 14px;font-size:13px;font-weight:600}
+.mc-lv button.on{border-color:var(--g2);background:var(--g2);color:#fff}
+.mc-board{margin:0 16px;background:var(--gl);border:1px solid #d5ebde;border-radius:22px;padding:26px 16px;text-align:center}
+.mc-board small{display:block;font-size:13px;font-weight:700;color:var(--gd)}
+.mc-amt{font-size:clamp(44px,13vw,64px);font-weight:800;line-height:1.1;letter-spacing:-.02em;margin-top:4px;word-break:keep-all}
+.mc-amt.sm{font-size:clamp(34px,10vw,48px)}
+.mc-tag{display:inline-block;margin-top:10px;background:var(--g2);color:#fff;border-radius:999px;padding:5px 14px;font-weight:800;font-size:17px}
+.mc-board.pop{animation:mcpop .25s ease}
+@keyframes mcpop{from{transform:scale(.96)}to{transform:none}}
+.mc-form{display:flex;gap:8px;margin:12px 16px 0}
+.mc-form input{flex:1;font-size:20px;font-weight:700;padding:13px 14px}
+.mc-form button{flex:none;border:0;border-radius:12px;background:var(--g2);color:#fff;font-size:16px;font-weight:700;padding:0 20px}
+.mc-res{display:none;margin:12px 16px 0;border-radius:16px;padding:16px;background:#FAFBFA;border:1px solid var(--line)}
+.mc-res.show{display:block}
+.mc-res b{font-size:19px}
+.mc-res.ok b{color:var(--gd)}.mc-res.no b{color:var(--redd)}
+.mc-how{margin:6px 0 0;font-size:15px;color:var(--sub);line-height:1.7}
+.mc-how strong{color:var(--tx);white-space:nowrap}
+.mc-how .m{display:block;margin-top:10px;font-size:12px;font-weight:800;color:var(--gd)}
+.mc-next{margin-top:12px;width:100%;border:1px solid var(--g2);background:#fff;color:var(--gd);border-radius:12px;padding:13px;font-size:16px;font-weight:700}
+.mc-guide{margin:14px 16px 0;border:1px solid var(--line);border-radius:16px;padding:0 16px}
+.mc-guide summary{padding:14px 0;font-weight:800;cursor:pointer;color:var(--tx)}
+.mc-guide[open]{padding-bottom:12px}
+.mc-guide h3{font-size:14px;margin:14px 0 4px;color:var(--gd)}
+.mc-guide ul{margin:0;font-size:15px;padding-left:20px;line-height:1.7}
+.mc-guide .ex{color:var(--sub);font-size:14px}
+.mc-st{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:14px 16px 0}
+.mc-st div{background:var(--gl);border-radius:14px;padding:10px 4px;text-align:center}
+.mc-st span{display:block;font-size:12px;color:var(--sub)}
+.mc-st b{font-size:19px}
+.mc-note{margin:12px 16px 0;font-size:12px;color:var(--sub);line-height:1.6}
 .vrow{display:flex;gap:8px}
 .az label{margin-top:12px}
 .vrow select{flex:1;min-width:0;background:#F7F9F8 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%237A8580' stroke-width='2'/%3E%3C/svg%3E") no-repeat right 14px center;padding-right:36px}
@@ -222,6 +257,65 @@ textarea:focus,input:focus,select:focus{border-color:var(--g2);background:#fff}
   <div class="gtip" id="gtip">오른쪽으로 밀면 편집 · 왼쪽으로 밀면 삭제 · 길게 눌러 순서 변경</div>
 </main>
 
+<!-- 탭: 암산 -->
+<main class="page" id="pgCalc">
+  <div class="ttl">암산</div>
+  <div class="seg" id="mcSeg"><button class="on" data-k="Ex">달러 → 원화</button><button data-k="Dc">할인율</button><button data-k="Up">g당 가격</button></div>
+  <section class="mc-p" id="mcEx">
+    <div class="mc-sub">방법 1: 3으로 나눠 4천 원 곱하기 · 방법 2: 3으로 나눈 걸 더하고 0 세 개 (환율 약 1,333원 기준)</div>
+    <div class="mc-lv"><button class="on" data-lv="0">쉬움</button><button data-lv="1">어려움</button></div>
+    <div class="mc-board"><small>이 금액은 원화로 약 얼마?</small><div class="mc-amt"></div><span class="mc-tag hide"></span></div>
+    <form class="mc-form"><input inputmode="numeric" autocomplete="off" placeholder="원화 입력 (예: 40000)"><button type="submit">채점</button></form>
+    <div class="mc-res" aria-live="polite"><b></b><div class="mc-how"></div><button class="mc-next" type="button">다음 문제</button></div>
+    <details class="mc-guide"><summary>계산하는 방법 보기</summary>
+      <h3>방법 1</h3>
+      <ul><li>3으로 나눈다</li><li>나눈 거에 4천 원 곱한다</li></ul>
+      <h3>방법 2</h3>
+      <ul><li>3으로 나눈다</li><li>나눈 걸 달러에 더한다</li><li>0을 3개 붙인다</li></ul>
+    </details>
+    <div class="mc-st"><div><span>푼 문제</span><b class="sN">0</b></div><div><span>정답률</span><b class="sR">-</b></div><div><span>연속 정답</span><b class="sS">0</b></div></div>
+    <div class="mc-note">정답 기준: 1,333원 환율로 계산한 값의 ±5% 안이면 정답. 실제 환율이 크게 바뀌면 방법도 바꿔야 해. "4"처럼 만 원 단위로 써도 돼.</div>
+  </section>
+  <section class="mc-p" id="mcDc" hidden>
+    <div class="mc-sub">방법 1: 10% 구해서 할인액 빼기 · 방법 2: 내는 비율만큼 10%를 곱하기</div>
+    <div class="mc-lv"><button class="on" data-lv="0">쉬움</button><button data-lv="1">어려움</button></div>
+    <div class="mc-board"><small>할인하면 얼마 내?</small><div class="mc-amt sm"></div><span class="mc-tag hide"></span></div>
+    <form class="mc-form"><input inputmode="numeric" autocomplete="off" placeholder="내는 돈 입력 (예: 28000)"><button type="submit">채점</button></form>
+    <div class="mc-res" aria-live="polite"><b></b><div class="mc-how"></div><button class="mc-next" type="button">다음 문제</button></div>
+    <details class="mc-guide"><summary>계산하는 방법 보기</summary>
+      <h3>핵심: 10%부터 구한다</h3>
+      <ul><li>10% = 가격에서 0 하나 떼기 <span class="ex">(40,000원 → 4,000원)</span></li><li>5% = 10%의 반 <span class="ex">(→ 2,000원)</span></li></ul>
+      <h3>방법 1 (할인액 빼기)</h3>
+      <ul><li>10%를 구한다</li><li>할인율 앞자리만큼 곱한다 (30%면 ×3)</li><li>가격에서 뺀다</li><li class="ex">40,000 → 4,000 × 3 = 12,000 → 40,000 − 12,000 = 28,000원</li></ul>
+      <h3>방법 2 (내는 비율로 바로)</h3>
+      <ul><li>100에서 할인율을 뺀다 (30% 할인 → 70% 냄)</li><li>10%를 구한다</li><li>내는 비율 앞자리만큼 곱한다 (70%면 ×7)</li><li class="ex">40,000 → 4,000 × 7 = 28,000원</li></ul>
+      <h3>꿀팁: 순서 바꾸기</h3>
+      <ul><li>A의 B% = B의 A%</li><li class="ex">50의 8% 어려우면 → 8의 50% = 4</li></ul>
+    </details>
+    <div class="mc-st"><div><span>푼 문제</span><b class="sN">0</b></div><div><span>정답률</span><b class="sR">-</b></div><div><span>연속 정답</span><b class="sS">0</b></div></div>
+    <div class="mc-note">정답 기준: 쉬움은 딱 맞아야 정답, 어려움은 ±2% 안이면 정답. "2.8"처럼 만 원 단위로 써도 돼.</div>
+  </section>
+  <section class="mc-p" id="mcUp" hidden>
+    <div class="mc-sub">마트 가격표처럼 100g당·10g당 가격 구하기 · 방법 1: 묶음 수로 나누기 · 방법 2: 1kg으로 맞추고 0 떼기</div>
+    <div class="mc-lv"><button class="on" data-lv="0">쉬움</button><button data-lv="1">어려움</button></div>
+    <div class="mc-board"><small>이 상품은</small><div class="mc-amt  sm"></div><span class="mc-tag hide"></span></div>
+    <form class="mc-form"><input inputmode="numeric" autocomplete="off" placeholder="g당 가격 입력 (예: 1600)"><button type="submit">채점</button></form>
+    <div class="mc-res" aria-live="polite"><b></b><div class="mc-how"></div><button class="mc-next" type="button">다음 문제</button></div>
+    <details class="mc-guide"><summary>계산하는 방법 보기</summary>
+      <h3>핵심: 묶음 수부터 센다</h3>
+      <ul><li>100g 묶음 수 = 무게에서 0 두 개 떼기 <span class="ex">(500g → 5묶음, 1.5kg → 15묶음)</span></li><li>10g 묶음 수 = 무게에서 0 하나 떼기 <span class="ex">(50g → 5묶음)</span></li><li>가격은 먼저 깔끔하게 반올림 <span class="ex">(7,980원 → 8,000원)</span></li></ul>
+      <h3>방법 1 (묶음 수로 나누기)</h3>
+      <ul><li>묶음 수를 센다</li><li>가격 ÷ 묶음 수</li><li class="ex">500g 8,000원 → 5묶음 → 8,000 ÷ 5 = 100g당 1,600원</li></ul>
+      <h3>방법 2 (1kg으로 맞추고 0 떼기)</h3>
+      <ul><li>무게가 1kg(10g당이면 100g) 되게 몇 배 할지 본다 <span class="ex">(250g ×4, 200g ×5, 500g ×2)</span></li><li>가격에도 똑같이 곱한다</li><li>0 하나 떼면 끝</li><li class="ex">250g 3,000원 → ×4 = 1kg 12,000원 → 0 떼기 = 100g당 1,200원</li></ul>
+      <h3>꿀팁</h3>
+      <ul><li>10g당 = 100g당에서 0 하나 더 떼기</li><li>두 상품 비교는 둘 다 같은 기준(100g당)으로 바꾼 뒤 비교</li><li>딱 안 떨어지는 무게(350g 등)는 방법 1이 편해</li></ul>
+    </details>
+    <div class="mc-st"><div><span>푼 문제</span><b class="sN">0</b></div><div><span>정답률</span><b class="sR">-</b></div><div><span>연속 정답</span><b class="sS">0</b></div></div>
+    <div class="mc-note">정답 기준: 쉬움은 딱 맞아야 정답, 어려움은 ±5% 안이면 정답. 마트에선 대충 맞으면 충분해.</div>
+  </section>
+</main>
+
 <!-- 탭2: 통계 -->
 <main class="page" id="pgStats">
   <div class="ttl">통계</div>
@@ -294,6 +388,8 @@ textarea:focus,input:focus,select:focus{border-color:var(--g2);background:#fff}
 <nav class="tabbar" id="tabbar">
   <button class="on" data-p="pgCards">
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="3"/><line x1="3" y1="10" x2="21" y2="10"/></svg>카드</button>
+  <button data-p="pgCalc">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="3"/><line x1="8" y1="7.5" x2="16" y2="7.5"/><line x1="8.5" y1="12" x2="8.5" y2="12"/><line x1="12" y1="12" x2="12" y2="12"/><line x1="15.5" y1="12" x2="15.5" y2="12"/><line x1="8.5" y1="16" x2="8.5" y2="16"/><line x1="12" y1="16" x2="12" y2="16"/><line x1="15.5" y1="16" x2="15.5" y2="16"/></svg>암산</button>
   <button data-p="pgStats">
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="6" y1="20" x2="6" y2="13"/><line x1="12" y1="20" x2="12" y2="5"/><line x1="18" y1="20" x2="18" y2="10"/></svg>통계</button>
   <button data-p="pgSet">
@@ -1154,6 +1250,121 @@ $('#voiceSel').onchange=e=>{
 $('#voiceTest').onclick=()=>say(TEST);
 $('#azKey').onchange=e=>{TTS.key=e.target.value.trim();azAvail=null;saveTTS();renderVoices();loadAzList();if(TTS.key)toast('키 저장됨 · 스피커로 확인해 보세요')};
 $('#azRegion').onchange=e=>{TTS.region=(e.target.value.trim()||'eastus').toLowerCase().replace(/\s+/g,'');azAvail=null;saveTTS();renderVoices();loadAzList()};
+
+
+/* ---------- 탭: 암산 ---------- */
+(()=>{
+  const ri=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+  const fmt=v=>Math.round(v).toLocaleString('ko-KR');
+  const r2=v=>Math.round(v*100)/100;
+  const num=v=>Number.isInteger(v)?v.toLocaleString('ko-KR'):String(r2(v));
+  // 문제 묶음 하나(달러·할인·g당)를 만드는 공용 틀
+  function trainer(k,{pick,show,truth,parse,good,explain}){
+    const p=$('#mc'+k),amt=p.querySelector('.mc-amt'),tag=p.querySelector('.mc-tag'),board=p.querySelector('.mc-board'),
+      inp=p.querySelector('input'),res=p.querySelector('.mc-res'),st={n:0,ok:0,s:0};
+    let hard=false,q=null,done=false;
+    function newQ(focus){
+      let v,t=0;do{v=pick(hard)}while(q&&JSON.stringify(v)===JSON.stringify(q)&&++t<20);
+      q=v;done=false;show(q,amt,tag);inp.value='';res.className='mc-res';
+      board.classList.remove('pop');void board.offsetWidth;board.classList.add('pop');
+      if(focus)inp.focus({preventScroll:true});
+    }
+    p.querySelector('form').onsubmit=e=>{
+      e.preventDefault();inp.blur();
+      if(done){newQ(true);return}
+      const raw=inp.value.replace(/[^0-9.]/g,'');if(!raw)return;
+      const g=parse(parseFloat(raw),q),t=truth(q),ok=good(g,t,hard);
+      done=true;st.n++;if(ok){st.ok++;st.s++}else st.s=0;
+      res.querySelector('b').textContent=(ok?'정답! ':'아쉬워! ')+explain.title(t,q);
+      res.querySelector('.mc-how').innerHTML=explain.how(q,t)+(ok?'':'<span class="m">내 답</span>'+fmt(g)+'원 (차이 '+fmt(Math.abs(g-t))+'원)');
+      res.className='mc-res show '+(ok?'ok':'no');
+      p.querySelector('.sN').textContent=st.n;p.querySelector('.sR').textContent=Math.round(st.ok/st.n*100)+'%';p.querySelector('.sS').textContent=st.s;
+    };
+    p.querySelector('.mc-next').onclick=()=>newQ(true);
+    p.querySelector('.mc-lv').onclick=e=>{const b=e.target.closest('button');if(!b)return;hard=b.dataset.lv==='1';
+      p.querySelectorAll('.mc-lv button').forEach(x=>x.classList.toggle('on',x===b));newQ(false)};
+    newQ(false);
+  }
+
+  /* 1) 달러 → 원화 */
+  const RATE=4000/3,usdS=v=>'$'+(Number.isInteger(v)?v:v.toFixed(2));
+  trainer('Ex',{
+    pick:h=>{if(!h)return 3*ri(1,100);const t=ri(0,3);
+      return t===0?ri(1,49)+.99:t===1?ri(1,40)*5+(ri(0,1)?0:.5):t===2?ri(101,999):ri(1,99)},
+    show:(u,a)=>{a.textContent=usdS(u)},
+    truth:u=>u*RATE,
+    parse:(g,u)=>g<1000&&u>=3?g*10000:g,
+    good:(g,t)=>Math.abs(g-t)/t<=.05,
+    explain:{title:t=>'약 '+fmt(t)+'원',how:u=>{
+      const c=Math.floor(u/3),rem=r2(u-c*3),remW=rem*1300,th=r2(u/3);
+      return '<span class="m">방법 1</span>'+usdS(u)+' ÷ 3 = '+c+'덩어리'+(rem>0?', 나머지 '+usdS(rem):'')+'<br>'
+        +c+'덩어리 × 4천 = <strong>'+fmt(c*4000)+'원</strong>'
+        +(rem>0?' + 남은 '+usdS(rem)+' × 1,300 = <strong>'+fmt(remW)+'원</strong> → 합계 <strong>'+fmt(c*4000+remW)+'원</strong>':'')
+        +'<span class="m">방법 2</span>'+usdS(u)+' ÷ 3 = '+th+' → '+u+' + '+th+' = '+r2(u*4/3)+' → 0 세 개 붙이면 <strong>'+fmt(u*1000+u*1000/3)+'원</strong>'}}
+  });
+
+  /* 2) 할인율 */
+  function partStr(rate,ten){
+    const k=Math.floor(rate/10),half=rate%10===5,val=ten*k+(half?ten/2:0);let s='';
+    if(k>0)s+=fmt(ten)+' × '+k+' = '+fmt(ten*k);
+    if(half)s+=(k>0?', 반 개(5%) ':'5% = 10%의 반 = ')+fmt(ten/2)+(k>0?' 더하면 '+fmt(val):'');
+    return {s,val};
+  }
+  trainer('Dc',{
+    pick:h=>{if(!h)return [ri(1,20)*5000,ri(1,9)*10];const t=ri(0,2);
+      const p=t===0?ri(10,99)*1000-100:t===1?ri(11,199)*1000:ri(2,40)*500;return [p,ri(1,18)*5]},
+    show:([p,c],a,tag)=>{a.textContent=fmt(p)+'원';tag.textContent=c+'% 할인';tag.classList.remove('hide')},
+    truth:([p,c])=>p*(100-c)/100,
+    parse:(g,[p])=>g<1000&&p>=10000?g*10000:g,
+    good:(g,t,h)=>h?Math.abs(g-t)/t<=.02:Math.abs(g-t)<1,
+    explain:{title:t=>fmt(t)+'원',how:([p,c])=>{
+      const ten=p/10,off=partStr(c,ten),pay=partStr(100-c,ten);
+      return '<span class="m">10% 구하기</span>'+fmt(p)+'원에서 0 하나 떼기 → <strong>'+fmt(ten)+'원</strong>'
+        +'<span class="m">방법 1 (할인액 빼기)</span>'+c+'% 할인액: '+off.s+'<br>'+fmt(p)+' − '+fmt(off.val)+' = <strong>'+fmt(p-off.val)+'원</strong>'
+        +'<span class="m">방법 2 (내는 비율)</span>'+c+'% 할인 → '+(100-c)+'% 냄<br>'+pay.s+' → <strong>'+fmt(pay.val)+'원</strong>'}}
+  });
+
+  /* 3) g당 가격 (100g당 / 10g당) */
+  const wS=g=>g>=1000?(g/1000)+'kg':g+'g';
+  const nice=v=>v>=1000?Math.round(v/100)*100:v>=100?Math.round(v/10)*10:v; // 깔끔한 가격으로 반올림
+  trainer('Up',{
+    pick:h=>{
+      const u=Math.random()<.65?100:10;
+      if(u===100){
+        const g=h?[150,250,350,400,450,600,750,800,1200,1500,2000][ri(0,10)]:[100,200,300,400,500,1000][ri(0,5)];
+        let price=ri(5,40)*100*g/100;
+        if(h){price=Math.max(500,Math.round(price/100)*100);if(ri(0,1))price-=20}
+        return [g,price,u];
+      }
+      const g=h?[30,40,60,70,80,120,150,180,250][ri(0,8)]:[10,20,50,100,200][ri(0,4)];
+      let price=ri(2,30)*10*g/10;
+      if(h){price=Math.max(500,Math.round(price/100)*100);if(ri(0,1))price-=20}
+      return [g,price,u];
+    },
+    show:([g,p,u],a,tag)=>{a.textContent=wS(g)+' '+fmt(p)+'원';tag.textContent=u+'g당 얼마?';tag.classList.remove('hide')},
+    truth:([g,p,u])=>p/(g/u),
+    parse:g=>g,
+    good:(g,t,h)=>h?Math.abs(g-t)/t<=.05:Math.abs(g-t)<1,
+    explain:{title:(t,[,,u])=>u+'g당 약 '+fmt(t)+'원',how:([g,p,u],t)=>{
+      const n=g/u,pr=nice(p),target=u*10;
+      let out='<span class="m">방법 1 (묶음 수로 나누기)</span>'
+        +wS(g)+' → '+u+'g이 <strong>'+num(n)+'묶음</strong><br>'
+        +(pr!==p?fmt(p)+'원 → 반올림 '+fmt(pr)+'원<br>':'')
+        +fmt(pr)+' ÷ '+num(n)+' = <strong>'+fmt(pr/n)+'원</strong>';
+      out+='<span class="m">방법 2 (1'+(u===100?'kg':'00g')+'으로 맞추고 0 떼기)</span>';
+      if(target%g===0){const f=target/g;
+        out+=wS(g)+' × '+f+' = '+wS(target)+'<br>'+fmt(pr)+' × '+f+' = '+fmt(pr*f)+'원 → 0 하나 떼기 = <strong>'+fmt(pr*f/10)+'원</strong>';
+      }else if(g%target===0){const f=g/target;
+        out+=wS(g)+' ÷ '+f+' = '+wS(target)+'<br>'+fmt(pr)+' ÷ '+f+' = '+fmt(pr/f)+'원 → 0 하나 떼기 = <strong>'+fmt(pr/f/10)+'원</strong>';
+      }else out+=wS(g)+'은 '+wS(target)+'으로 딱 안 맞아서 방법 1이 편해';
+      if(u===100)out+='<span class="m">10g당으로 보면</span>0 하나 더 떼기 → 약 '+fmt(t/10)+'원';
+      return out}}
+  });
+
+  $('#mcSeg').onclick=e=>{const b=e.target.closest('button');if(!b)return;
+    document.querySelectorAll('#mcSeg button').forEach(x=>x.classList.toggle('on',x===b));
+    document.querySelectorAll('#pgCalc .mc-p').forEach(p=>p.hidden=p.id!=='mc'+b.dataset.k)};
+})();
 
 load();renderAll();renderVoices();loadAzList();
 </script>

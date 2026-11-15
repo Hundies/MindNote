@@ -123,7 +123,9 @@ h1{font-family:'Playfair Display',Georgia,serif;font-size:36px;margin:0;font-wei
 .mc-tag{display:inline-block;margin-top:10px;background:var(--g2);color:#fff;border-radius:999px;padding:5px 14px;font-weight:800;font-size:17px}
 .mc-pair{display:grid;grid-template-columns:1.35fr 1fr;gap:8px;padding:20px 12px}
 .mc-pair>div{background:#fff;border-radius:14px;padding:12px 6px}
-.mc-pair b{display:block;font-size:clamp(24px,7.5vw,34px);font-weight:800;letter-spacing:-.02em;margin-top:2px;white-space:nowrap}
+.mc-pair>.pn{grid-column:1/-1;background:none;padding:0 4px 2px;font-size:17px;font-weight:800;color:var(--tx);word-break:keep-all}
+.mc-pair>.pn span{display:inline-block;margin-left:6px;font-size:12px;font-weight:700;color:var(--gd);background:#fff;border-radius:999px;padding:2px 8px;vertical-align:2px}
+.mc-pair b{display:block;font-size:clamp(20px,6.6vw,30px);font-weight:800;letter-spacing:-.02em;margin-top:2px;white-space:nowrap}
 .mc-board.pop{animation:mcpop .25s ease}
 @keyframes mcpop{from{transform:scale(.96)}to{transform:none}}
 .mc-form{display:flex;gap:8px;margin:12px 16px 0}
@@ -287,7 +289,7 @@ textarea:focus,input:focus,select:focus{border-color:var(--g2);background:#fff}
   </section>
   <section class="mc-p" id="mcUp" hidden>
     <div class="mc-lv"><button class="on" data-lv="0">쉬움</button><button data-lv="1">어려움</button><button class="mc-rnd" type="button" aria-label="다른 문제"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/><line x1="4" y1="4" x2="9" y2="9"/></svg>랜덤</button></div>
-    <div class="mc-board mc-pair"><div><small>물품금액</small><b class="pa"></b></div><div><small>물품중량</small><b class="pw"></b></div></div>
+    <div class="mc-board mc-pair"><div class="pn"></div><div><small>물품금액</small><b class="pa"></b></div><div><small class="pwl">물품중량</small><b class="pw"></b></div></div>
     <form class="mc-form"><input inputmode="numeric" autocomplete="off" placeholder="100g당 가격 (예: 1600)"><button type="submit">채점</button></form>
     <div class="mc-res" aria-live="polite"><b></b><div class="mc-how"></div><button class="mc-next" type="button">다음 문제</button></div>
     <details class="mc-guide"><summary>계산하는 방법 보기</summary>
@@ -301,7 +303,7 @@ textarea:focus,input:focus,select:focus{border-color:var(--g2);background:#fff}
       <ul><li>10g당 = 100g당에서 0 하나 더 떼기</li><li>두 상품 비교는 둘 다 같은 기준(100g당)으로 바꾼 뒤 비교</li><li>딱 안 떨어지는 무게(350g 등)는 방법 1이 편해</li><li>100g보다 작으면(40g 등) 10g 묶음부터 세고, 0 하나 붙이면 100g당</li></ul>
     </details>
     <div class="mc-st"><div><span>푼 문제</span><b class="sN">0</b></div><div><span>정답률</span><b class="sR">-</b></div><div><span>연속 정답</span><b class="sS">0</b></div></div>
-    <div class="mc-note">100g당 가격만 적으면 돼. 10g당은 0 하나 떼면 되니까 풀이에 같이 보여줘. 쉬움은 딱 맞아야, 어려움은 ±5% 안이면 정답.</div>
+    <div class="mc-note">쉬움은 한 개짜리, 어려움은 여러 개 묶음 상품이야. 100g(음료는 100ml)당 가격만 적으면 되고, ±5% 안이면 정답. 가격은 마트·온라인 기준 대략값이라 실제와 다를 수 있어.</div>
   </section>
   <section class="mc-p" id="mcPy" hidden>
     <div class="mc-lv"><button class="on" data-lv="0">쉬움</button><button data-lv="1">어려움</button><button class="mc-rnd" type="button" aria-label="다른 문제"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/><line x1="4" y1="4" x2="9" y2="9"/></svg>랜덤</button></div>
@@ -1357,52 +1359,68 @@ $('#azRegion').onchange=e=>{TTS.region=(e.target.value.trim()||'eastus').toLower
         +'<span class="m">방법 2 (내는 비율)</span>'+c+'% 할인 → '+(100-c)+'% 냄<br>'+pay.s+' → <strong>'+fmt(pay.val)+'원</strong>'}}
   });
 
-  /* 3) g당 가격: 가격표만 보고 100g당·10g당 둘 다 맞히기 */
+  /* 3) g당 가격: 실제 마트 상품으로 100g(ml)당 가격 맞히기 */
   (()=>{
-    const wS=g=>g>=1000?(g/1000)+'kg':g+'g';
+    // [분류, 상품명, 한 개 중량, 개수, 단위, 가격, 묶음 이름] — 가격은 마트·온라인 기준 대략값
+    const ITEMS=[
+      ['과자','농심 새우깡',90,1,'g',1500],['과자','오리온 포카칩 오리지널',66,1,'g',1700],['과자','롯데 빼빼로 오리지널',54,1,'g',1700],
+      ['과자','해태 홈런볼 초코',46,1,'g',1700],['과자','오리온 초코파이 情 12개입',468,1,'g',4800],['과자','오리온 오예스 12개입',360,1,'g',4500],
+      ['식료품','한성 켄터키 프랑크',1000,1,'g',3670],['식료품','오뚜기 3분 카레 약간매운맛',200,1,'g',1800],['식료품','청정원 순창 고추장',1000,1,'g',12900],
+      ['식료품','백설 하얀설탕',1000,1,'g',2980],['식료품','풀무원 국산콩 두부 부침용',300,1,'g',2980],['식료품','하림 냉동 닭가슴살',1000,1,'g',9900],
+      ['정육','국내산 삼겹살',600,1,'g',15900],['정육','미국산 척아이롤',1000,1,'g',23900],['곡물','신동진쌀',10000,1,'g',35900],['정육','한우 1++ 등심',500,1,'g',59000],
+      ['채소','양파',3000,1,'g',6980],['채소','감자',2000,1,'g',5980],['채소','당근',1000,1,'g',3480],['채소','깐마늘',500,1,'g',5980],
+      ['과일','바나나 한 송이',1200,1,'g',3980],['과일','부사 사과',1500,1,'g',9980],['과일','방울토마토',750,1,'g',6980],
+      ['음료','서울우유 나100%',1000,1,'ml',3180],['음료','코카콜라',1500,1,'ml',3280],['음료','칠성사이다',1500,1,'ml',2980],['음료','포카리스웨트',620,1,'ml',2200],
+      // 여러 개 묶음 (어려움)
+      ['과자','오리온 오예스 28개입',840,2,'g',12200,'박스'],['과자','농심 새우깡',90,4,'g',5200,'봉'],['식료품','CJ 햇반',210,12,'g',13900,'개'],
+      ['식료품','농심 신라면',120,5,'g',4500,'봉'],['식료품','오뚜기 진라면 순한맛',120,5,'g',4200,'봉'],['식료품','동원참치 라이트 스탠다드',150,4,'g',9980,'캔'],
+      ['식료품','스팸 클래식',200,3,'g',13980,'캔'],['식료품','맥심 모카골드 커피믹스',12,100,'g',14900,'개'],['식료품','비비고 왕교자',1050,2,'g',13980,'봉'],
+      ['식료품','한성 켄터키 프랑크',1000,2,'g',7340,'개'],['음료','제주 삼다수',2000,6,'ml',6480,'병'],['음료','코카콜라 캔',355,6,'ml',6980,'캔'],
+      ['음료','서울우유 나100%',1000,2,'ml',5480,'팩'],['음료','빙그레 바나나맛우유',240,8,'ml',10800,'개']
+    ];
     const nice=v=>v>=1000?Math.round(v/100)*100:v>=100?Math.round(v/10)*10:v;
+    // 무게 표시: kg·g / L·ml 섞기
+    const big=u=>u==='g'?'kg':'L';
+    const disp=(x,u)=>(x>=500&&x%500===0&&ri(0,1))?(x/1000)+big(u):fmt(x)+u;
     const p=$('#mcUp'),board=p.querySelector('.mc-board'),
       ins=[...p.querySelectorAll('input')],res=p.querySelector('.mc-res'),st={n:0,ok:0,s:0};
     let hard=false,q=null,done=false;
-    // 무게 표시: kg·g 섞기 (5kg / 5000g, 0.5kg / 500g)
-    const disp=g=>(g>=500&&g%500===0&&ri(0,1))?(g/1000)+'kg':g+'g';
-    // 무게별로 현실적인 100g당 가격대 (고기·간식은 비싸고, 쌀·대용량은 쌈)
-    const per100=g=>g<=200?ri(8,60)*100:g<=600?ri(5,40)*100:g<=2000?ri(3,35)*100:g<=5000?ri(2,15)*100:ri(25,70)*10;
     function pick(){
-      for(let t=0;t<50;t++){
-        const g=!hard?pickArr([100,200,300,400,500,600,1000,2000,3000,5000,10000])
-          :pickArr([40,80,150,180,250,350,450,750,1200,1500,2500,4000,5000,10000]);
-        let price=per100(g)*g/100;
-        if(hard){price=Math.max(500,Math.round(price/100)*100);price-=pickArr([0,20,100])}
-        if(price>100000||price<500)continue;
-        if(price>50000&&Math.random()>.1)continue; // 5만 원 넘는 건 가끔만
-        return [g,price,disp(g)];
-      }
-      return [500,8000,'500g'];
+      const pool=ITEMS.filter(it=>(it[3]>1)===hard);
+      for(let t=0;t<30;t++){const it=pickArr(pool);if(it[5]>50000&&Math.random()>.15)continue;if(!q||it!==q.it)return it}
+      return pickArr(pool);
     }
     function newQ(focus){
-      let v,t=0;do{v=pick()}while(q&&v[0]===q[0]&&v[1]===q[1]&&++t<20);
-      q=v;done=false;p.querySelector('.pa').textContent=fmt(q[1])+'원';p.querySelector('.pw').textContent=q[2];
-      ins[0].value='';res.className='mc-res';
+      const it=pick(),[cat,name,each,cnt,u,price,pk]=it,w=disp(each,u);
+      q={it,cat,name,each,cnt,u,price,w,total:each*cnt,wl:cnt>1?w+' × '+cnt+pk:w};done=false;
+      p.querySelector('.pn').innerHTML=esc(name)+'<span>'+cat+'</span>';
+      p.querySelector('.pa').textContent=fmt(price)+'원';
+      p.querySelector('.pwl').textContent=u==='g'?'물품중량':'물품용량';
+      p.querySelector('.pw').textContent=q.wl;
+      ins[0].value='';ins[0].placeholder='100'+u+'당 가격';res.className='mc-res';
       board.classList.remove('pop');void board.offsetWidth;board.classList.add('pop');
       if(focus)ins[0].focus({preventScroll:true});
     }
     function how(){
-      const [g,pr0,w]=q,pr=nice(pr0),n=g/100;
-      if(g<100){const m=g/10; // 100g보다 작으면 10g 묶음부터
-        return '<span class="m">방법 (10g 묶음부터)</span>'+w+' → 10g이 <strong>'+m+'묶음</strong><br>'
+      const {u,price:pr0,total:g,cnt,each,w}=q,pr=nice(pr0),n=g/100,K=big(u),ro=K==='kg'?'으로':'로';
+      let o='';
+      if(cnt>1)o+='<span class="m">총 '+(u==='g'?'중량':'용량')+'</span>'+fmt(each)+u+' × '+cnt+' = <strong>'+fmt(g)+u+'</strong>';
+      const gs=cnt>1?fmt(g)+u:(w.endsWith(K)?w+' = '+fmt(g)+u:w);
+      if(g<100){const m=r2(g/10);
+        return o+'<span class="m">방법 (10'+u+' 묶음부터)</span>'+gs+' → 10'+u+'이 <strong>'+num(m)+'묶음</strong><br>'
           +(pr!==pr0?fmt(pr0)+'원 → 반올림 '+fmt(pr)+'원<br>':'')
-          +fmt(pr)+' ÷ '+m+' = <strong>10g당 '+fmt(pr/m)+'원</strong>'
-          +'<span class="m">100g당</span>10g당에 0 하나 붙이기 → <strong>100g당 '+fmt(pr/m*10)+'원</strong>';
+          +fmt(pr)+' ÷ '+num(m)+' = <strong>10'+u+'당 약 '+fmt(pr/m)+'원</strong>'
+          +'<span class="m">100'+u+'당</span>10'+u+'당에 0 하나 붙이기 → <strong>100'+u+'당 약 '+fmt(pr/m*10)+'원</strong>';
       }
-      let o='<span class="m">방법 1 (묶음 수로 나누기)</span>'+(w.endsWith('kg')?w+' = '+g+'g':w)+' → 100g이 <strong>'+num(n)+'묶음</strong><br>'
+      o+='<span class="m">방법 1 (묶음 수로 나누기)</span>'+gs+' → 100'+u+'이 <strong>'+num(r2(n))+'묶음</strong><br>'
         +(pr!==pr0?fmt(pr0)+'원 → 반올림 '+fmt(pr)+'원<br>':'')
-        +fmt(pr)+' ÷ '+num(n)+' = <strong>100g당 '+fmt(pr/n)+'원</strong>'
-        +'<span class="m">방법 2 (1kg으로 맞추고 0 떼기)</span>';
-      if(1000%g===0){const f=1000/g;o+=w+' × '+f+' = 1kg<br>'+fmt(pr)+' × '+f+' = '+fmt(pr*f)+'원 → 0 하나 떼기 = <strong>100g당 '+fmt(pr*f/10)+'원</strong>'}
-      else if(g%1000===0){const f=g/1000;o+=w+' ÷ '+f+' = 1kg<br>'+fmt(pr)+' ÷ '+f+' = '+fmt(pr/f)+'원 → 0 하나 떼기 = <strong>100g당 '+fmt(pr/f/10)+'원</strong>'}
-      else o+=w+'은 1kg으로 딱 안 맞아서 방법 1이 편해';
-      return o+'<span class="m">10g당</span>100g당에서 0 하나 더 떼기 → <strong>10g당 '+fmt(pr/n/10)+'원</strong>';
+        +fmt(pr)+' ÷ '+num(r2(n))+' = <strong>100'+u+'당 약 '+fmt(pr/n)+'원</strong>'
+        +'<span class="m">방법 2 (1'+K+ro+' 맞추고 0 떼기)</span>';
+      if(g===1000)o+='이미 1'+K+'이니까 '+fmt(pr)+'원에서 0 하나 떼기 = <strong>100'+u+'당 '+fmt(pr/10)+'원</strong>';
+      else if(1000%g===0){const f=1000/g;o+=fmt(g)+u+' × '+f+' = 1'+K+'<br>'+fmt(pr)+' × '+f+' = '+fmt(pr*f)+'원 → 0 하나 떼기 = <strong>100'+u+'당 '+fmt(pr*f/10)+'원</strong>'}
+      else if(g%1000===0){const f=g/1000;o+=fmt(g)+u+' ÷ '+f+' = 1'+K+'<br>'+fmt(pr)+' ÷ '+f+' = '+fmt(pr/f)+'원 → 0 하나 떼기 = <strong>100'+u+'당 '+fmt(pr/f/10)+'원</strong>'}
+      else o+=fmt(g)+u+'은 1'+K+ro+' 딱 안 맞아서 방법 1이 편해';
+      return o+'<span class="m">10'+u+'당</span>100'+u+'당에서 0 하나 더 떼기 → <strong>10'+u+'당 약 '+fmt(pr/n/10)+'원</strong>';
     }
     p.querySelector('form').onsubmit=e=>{
       e.preventDefault();
@@ -1410,11 +1428,10 @@ $('#azRegion').onchange=e=>{TTS.region=(e.target.value.trim()||'eastus').toLower
       const v=parseFloat(ins[0].value.replace(/[^0-9.]/g,''));
       if(isNaN(v))return;
       ins[0].blur();
-      const tr=[q[1]/(q[0]/100),q[1]/(q[0]/10)];
-      const ok=hard?Math.abs(v-tr[0])/tr[0]<=.05:Math.abs(v-tr[0])<1;
+      const t=q.price/(q.total/100),ok=Math.abs(v-t)/t<=.05;
       done=true;st.n++;if(ok){st.ok++;st.s++}else st.s=0;
-      res.querySelector('b').textContent=(ok?'정답! ':'땡! ')+'100g당 '+fmt(tr[0])+'원';
-      res.querySelector('.mc-how').innerHTML=how()+(ok?'':'<span class="m">내 답</span>100g당 '+fmt(v)+'원 (차이 '+fmt(Math.abs(v-tr[0]))+'원)');
+      res.querySelector('b').textContent=(ok?'정답! ':'땡! ')+'100'+q.u+'당 '+fmt(t)+'원';
+      res.querySelector('.mc-how').innerHTML=how()+(ok?'':'<span class="m">내 답</span>100'+q.u+'당 '+fmt(v)+'원 (차이 '+fmt(Math.abs(v-t))+'원)');
       res.className='mc-res show '+(ok?'ok':'no');
       p.querySelector('.sN').textContent=st.n;p.querySelector('.sR').textContent=Math.round(st.ok/st.n*100)+'%';p.querySelector('.sS').textContent=st.s;
     };

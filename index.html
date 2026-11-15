@@ -114,6 +114,8 @@ h1{font-family:'Playfair Display',Georgia,serif;font-size:36px;margin:0;font-wei
 .mc-lv{display:flex;gap:6px;padding:0 16px 12px}
 .mc-lv button{border:1px solid #d5ebde;background:#fff;color:var(--sub);border-radius:999px;padding:7px 14px;font-size:13px;font-weight:600}
 .mc-lv button.on{border-color:var(--g2);background:var(--g2);color:#fff}
+.mc-lv .mc-rnd{margin-left:auto;display:flex;align-items:center;gap:5px;border-color:var(--g2);color:var(--gd)}
+.mc-lv .mc-rnd:active{background:var(--gl)}
 .mc-board{margin:0 16px;background:var(--gl);border:1px solid #d5ebde;border-radius:22px;padding:26px 16px;text-align:center}
 .mc-board small{display:block;font-size:13px;font-weight:700;color:var(--gd)}
 .mc-amt{font-size:clamp(44px,13vw,64px);font-weight:800;line-height:1.1;letter-spacing:-.02em;margin-top:4px;word-break:keep-all}
@@ -270,7 +272,7 @@ textarea:focus,input:focus,select:focus{border-color:var(--g2);background:#fff}
   <div class="ttl">암산</div>
   <div class="seg" id="mcSeg"><button class="on" data-k="Ex">달러→원</button><button data-k="Up">g당 가격</button><button data-k="Py">㎡→평</button><button data-k="Dc">할인율</button></div>
   <section class="mc-p" id="mcEx">
-    <div class="mc-lv"><button class="on" data-lv="0">쉬움</button><button data-lv="1">어려움</button></div>
+    <div class="mc-lv"><button class="on" data-lv="0">쉬움</button><button data-lv="1">어려움</button><button class="mc-rnd" type="button" aria-label="다른 문제"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/><line x1="4" y1="4" x2="9" y2="9"/></svg>랜덤</button></div>
     <div class="mc-board"><small>이 금액은 원화로 약 얼마?</small><div class="mc-amt"></div><span class="mc-tag hide"></span></div>
     <form class="mc-form"><input inputmode="numeric" autocomplete="off" placeholder="원화 입력 (예: 40000)"><button type="submit">채점</button></form>
     <div class="mc-res" aria-live="polite"><b></b><div class="mc-how"></div><button class="mc-next" type="button">다음 문제</button></div>
@@ -284,7 +286,7 @@ textarea:focus,input:focus,select:focus{border-color:var(--g2);background:#fff}
     <div class="mc-note">정답 기준: 1,333원 환율로 계산한 값의 ±5% 안이면 정답. 실제 환율이 크게 바뀌면 방법도 바꿔야 해. "4"처럼 만 원 단위로 써도 돼.</div>
   </section>
   <section class="mc-p" id="mcUp" hidden>
-    <div class="mc-lv"><button class="on" data-lv="0">쉬움</button><button data-lv="1">어려움</button></div>
+    <div class="mc-lv"><button class="on" data-lv="0">쉬움</button><button data-lv="1">어려움</button><button class="mc-rnd" type="button" aria-label="다른 문제"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/><line x1="4" y1="4" x2="9" y2="9"/></svg>랜덤</button></div>
     <div class="mc-board mc-pair"><div><small>물품금액</small><b class="pa"></b></div><div><small>물품중량</small><b class="pw"></b></div></div>
     <form class="mc-form"><input inputmode="numeric" autocomplete="off" placeholder="100g당 가격 (예: 1600)"><button type="submit">채점</button></form>
     <div class="mc-res" aria-live="polite"><b></b><div class="mc-how"></div><button class="mc-next" type="button">다음 문제</button></div>
@@ -302,7 +304,7 @@ textarea:focus,input:focus,select:focus{border-color:var(--g2);background:#fff}
     <div class="mc-note">100g당 가격만 적으면 돼. 10g당은 0 하나 떼면 되니까 풀이에 같이 보여줘. 쉬움은 딱 맞아야, 어려움은 ±5% 안이면 정답.</div>
   </section>
   <section class="mc-p" id="mcPy" hidden>
-    <div class="mc-lv"><button class="on" data-lv="0">쉬움</button><button data-lv="1">어려움</button></div>
+    <div class="mc-lv"><button class="on" data-lv="0">쉬움</button><button data-lv="1">어려움</button><button class="mc-rnd" type="button" aria-label="다른 문제"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/><line x1="4" y1="4" x2="9" y2="9"/></svg>랜덤</button></div>
     <div class="mc-board"><small>몇 평이야?</small><div class="mc-amt"></div><span class="mc-tag hide"></span></div>
     <form class="mc-form"><input inputmode="decimal" autocomplete="off" placeholder="평 입력 (예: 25.2)"><button type="submit">채점</button></form>
     <div class="mc-res" aria-live="polite"><b></b><div class="mc-how"></div><button class="mc-next" type="button">다음 문제</button></div>
@@ -320,7 +322,7 @@ textarea:focus,input:focus,select:focus{border-color:var(--g2);background:#fff}
     <div class="mc-note">정답 기준: 1평 = 3.3058㎡로 계산한 값의 ±3% 안이면 정답.</div>
   </section>
   <section class="mc-p" id="mcDc" hidden>
-    <div class="mc-lv"><button class="on" data-lv="0">쉬움</button><button data-lv="1">어려움</button></div>
+    <div class="mc-lv"><button class="on" data-lv="0">쉬움</button><button data-lv="1">어려움</button><button class="mc-rnd" type="button" aria-label="다른 문제"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/><line x1="4" y1="4" x2="9" y2="9"/></svg>랜덤</button></div>
     <div class="mc-board"><small>할인하면 얼마 내?</small><div class="mc-amt sm"></div><span class="mc-tag hide"></span></div>
     <form class="mc-form"><input inputmode="numeric" autocomplete="off" placeholder="내는 돈 입력 (예: 28000)"><button type="submit">채점</button></form>
     <div class="mc-res" aria-live="polite"><b></b><div class="mc-how"></div><button class="mc-next" type="button">다음 문제</button></div>
@@ -1304,8 +1306,8 @@ $('#azRegion').onchange=e=>{TTS.region=(e.target.value.trim()||'eastus').toLower
       p.querySelector('.sN').textContent=st.n;p.querySelector('.sR').textContent=Math.round(st.ok/st.n*100)+'%';p.querySelector('.sS').textContent=st.s;
     };
     p.querySelector('.mc-next').onclick=()=>newQ(true);
-    p.querySelector('.mc-lv').onclick=e=>{const b=e.target.closest('button');if(!b)return;hard=b.dataset.lv==='1';
-      p.querySelectorAll('.mc-lv button').forEach(x=>x.classList.toggle('on',x===b));newQ(false)};
+    p.querySelector('.mc-lv').onclick=e=>{const b=e.target.closest('button');if(!b)return;if(b.classList.contains('mc-rnd')){newQ(false);return}hard=b.dataset.lv==='1';
+      p.querySelectorAll('.mc-lv [data-lv]').forEach(x=>x.classList.toggle('on',x===b));newQ(false)};
     newQ(false);
   }
 
@@ -1402,8 +1404,8 @@ $('#azRegion').onchange=e=>{TTS.region=(e.target.value.trim()||'eastus').toLower
       p.querySelector('.sN').textContent=st.n;p.querySelector('.sR').textContent=Math.round(st.ok/st.n*100)+'%';p.querySelector('.sS').textContent=st.s;
     };
     p.querySelector('.mc-next').onclick=()=>newQ(true);
-    p.querySelector('.mc-lv').onclick=e=>{const b=e.target.closest('button');if(!b)return;hard=b.dataset.lv==='1';
-      p.querySelectorAll('.mc-lv button').forEach(x=>x.classList.toggle('on',x===b));newQ(false)};
+    p.querySelector('.mc-lv').onclick=e=>{const b=e.target.closest('button');if(!b)return;if(b.classList.contains('mc-rnd')){newQ(false);return}hard=b.dataset.lv==='1';
+      p.querySelectorAll('.mc-lv [data-lv]').forEach(x=>x.classList.toggle('on',x===b));newQ(false)};
     newQ(false);
   })();
 

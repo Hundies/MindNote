@@ -119,6 +119,9 @@ h1{font-family:'Playfair Display',Georgia,serif;font-size:36px;margin:0;font-wei
 .mc-amt{font-size:clamp(44px,13vw,64px);font-weight:800;line-height:1.1;letter-spacing:-.02em;margin-top:4px;word-break:keep-all}
 .mc-amt.sm{font-size:clamp(34px,10vw,48px)}
 .mc-tag{display:inline-block;margin-top:10px;background:var(--g2);color:#fff;border-radius:999px;padding:5px 14px;font-weight:800;font-size:17px}
+.mc-pair{display:grid;grid-template-columns:1.35fr 1fr;gap:8px;padding:20px 12px}
+.mc-pair>div{background:#fff;border-radius:14px;padding:12px 6px}
+.mc-pair b{display:block;font-size:clamp(24px,7.5vw,34px);font-weight:800;letter-spacing:-.02em;margin-top:2px;white-space:nowrap}
 .mc-board.pop{animation:mcpop .25s ease}
 @keyframes mcpop{from{transform:scale(.96)}to{transform:none}}
 .mc-form{display:flex;gap:8px;margin:12px 16px 0}
@@ -131,7 +134,7 @@ h1{font-family:'Playfair Display',Georgia,serif;font-size:36px;margin:0;font-wei
 .mc-form button{flex:none;border:0;border-radius:12px;background:var(--g2);color:#fff;font-size:16px;font-weight:700;padding:0 20px}
 .mc-res{display:none;margin:12px 16px 0;border-radius:16px;padding:16px;background:#FAFBFA;border:1px solid var(--line)}
 .mc-res.show{display:block}
-.mc-res b{font-size:19px}
+.mc-res b{display:block;font-size:19px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .mc-res.ok b{color:var(--gd)}.mc-res.no b{color:var(--redd)}
 .mc-how{margin:6px 0 0;font-size:15px;color:var(--sub);line-height:1.7}
 .mc-how strong{color:var(--tx);white-space:nowrap}
@@ -282,7 +285,7 @@ textarea:focus,input:focus,select:focus{border-color:var(--g2);background:#fff}
   </section>
   <section class="mc-p" id="mcUp" hidden>
     <div class="mc-lv"><button class="on" data-lv="0">쉬움</button><button data-lv="1">어려움</button></div>
-    <div class="mc-board"><div class="mc-amt sm"></div></div>
+    <div class="mc-board mc-pair"><div><small>물품금액</small><b class="pa"></b></div><div><small>물품중량</small><b class="pw"></b></div></div>
     <form class="mc-form"><input inputmode="numeric" autocomplete="off" placeholder="100g당 가격 (예: 1600)"><button type="submit">채점</button></form>
     <div class="mc-res" aria-live="polite"><b></b><div class="mc-how"></div><button class="mc-next" type="button">다음 문제</button></div>
     <details class="mc-guide"><summary>계산하는 방법 보기</summary>
@@ -1295,7 +1298,7 @@ $('#azRegion').onchange=e=>{TTS.region=(e.target.value.trim()||'eastus').toLower
       const raw=inp.value.replace(/[^0-9.]/g,'');if(!raw)return;
       const g=parse(parseFloat(raw),q),t=truth(q),ok=good(g,t,hard);
       done=true;st.n++;if(ok){st.ok++;st.s++}else st.s=0;
-      res.querySelector('b').textContent=(ok?'정답! ':'아쉬워! ')+explain.title(t,q);
+      res.querySelector('b').textContent=(ok?'정답! ':'땡! ')+explain.title(t,q);
       res.querySelector('.mc-how').innerHTML=explain.how(q,t)+(ok?'':'<span class="m">내 답</span>'+(unit==='평'?r1(g):fmt(g))+unit+' (차이 '+(unit==='평'?r1(Math.abs(g-t)):fmt(Math.abs(g-t)))+unit+')');
       res.className='mc-res show '+(ok?'ok':'no');
       p.querySelector('.sN').textContent=st.n;p.querySelector('.sR').textContent=Math.round(st.ok/st.n*100)+'%';p.querySelector('.sS').textContent=st.s;
@@ -1348,7 +1351,7 @@ $('#azRegion').onchange=e=>{TTS.region=(e.target.value.trim()||'eastus').toLower
   (()=>{
     const wS=g=>g>=1000?(g/1000)+'kg':g+'g';
     const nice=v=>v>=1000?Math.round(v/100)*100:v>=100?Math.round(v/10)*10:v;
-    const p=$('#mcUp'),amt=p.querySelector('.mc-amt'),board=p.querySelector('.mc-board'),
+    const p=$('#mcUp'),board=p.querySelector('.mc-board'),
       ins=[...p.querySelectorAll('input')],res=p.querySelector('.mc-res'),st={n:0,ok:0,s:0};
     let hard=false,q=null,done=false;
     // 무게 표시: kg·g 섞기 (5kg / 5000g, 0.5kg / 500g)
@@ -1362,7 +1365,7 @@ $('#azRegion').onchange=e=>{TTS.region=(e.target.value.trim()||'eastus').toLower
     }
     function newQ(focus){
       let v,t=0;do{v=pick()}while(q&&v[0]===q[0]&&v[1]===q[1]&&++t<20);
-      q=v;done=false;amt.textContent=fmt(q[1])+'원 / '+q[2];
+      q=v;done=false;p.querySelector('.pa').textContent=fmt(q[1])+'원';p.querySelector('.pw').textContent=q[2];
       ins[0].value='';res.className='mc-res';
       board.classList.remove('pop');void board.offsetWidth;board.classList.add('pop');
       if(focus)ins[0].focus({preventScroll:true});
@@ -1393,7 +1396,7 @@ $('#azRegion').onchange=e=>{TTS.region=(e.target.value.trim()||'eastus').toLower
       const tr=[q[1]/(q[0]/100),q[1]/(q[0]/10)];
       const ok=hard?Math.abs(v-tr[0])/tr[0]<=.05:Math.abs(v-tr[0])<1;
       done=true;st.n++;if(ok){st.ok++;st.s++}else st.s=0;
-      res.querySelector('b').textContent=(ok?'정답! ':'아쉬워! ')+'100g당 약 '+fmt(tr[0])+'원 · 10g당 약 '+fmt(tr[1])+'원';
+      res.querySelector('b').textContent=(ok?'정답! ':'땡! ')+'100g당 '+fmt(tr[0])+'원';
       res.querySelector('.mc-how').innerHTML=how()+(ok?'':'<span class="m">내 답</span>100g당 '+fmt(v)+'원 (차이 '+fmt(Math.abs(v-tr[0]))+'원)');
       res.className='mc-res show '+(ok?'ok':'no');
       p.querySelector('.sN').textContent=st.n;p.querySelector('.sR').textContent=Math.round(st.ok/st.n*100)+'%';p.querySelector('.sS').textContent=st.s;

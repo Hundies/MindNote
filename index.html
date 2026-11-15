@@ -1281,6 +1281,9 @@ $('#azRegion').onchange=e=>{TTS.region=(e.target.value.trim()||'eastus').toLower
 (()=>{
   const ri=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
   const fmt=v=>Math.round(v).toLocaleString('ko-KR');
+  // 가중치 뽑기: [[확률비중, 값 또는 함수], ...]
+  const wp=list=>{let t=list.reduce((a,x)=>a+x[0],0),r=Math.random()*t;for(const [w,v] of list){if((r-=w)<0)return typeof v==='function'?v():v}const v=list[list.length-1][1];return typeof v==='function'?v():v};
+  const pickArr=a=>a[ri(0,a.length-1)];
   const r2=v=>Math.round(v*100)/100,r1=v=>(Math.round(v*10)/10).toLocaleString('ko-KR');
   const num=v=>Number.isInteger(v)?v.toLocaleString('ko-KR'):String(r2(v));
   // 문제 묶음 하나(달러·할인·g당)를 만드는 공용 틀
@@ -1314,8 +1317,9 @@ $('#azRegion').onchange=e=>{TTS.region=(e.target.value.trim()||'eastus').toLower
   /* 1) 달러 → 원화 */
   const RATE=4000/3,usdS=v=>'$'+(Number.isInteger(v)?v:v.toFixed(2));
   trainer('Ex',{
-    pick:h=>{if(!h)return 3*ri(1,100);const t=ri(0,3);
-      return t===0?ri(1,49)+.99:t===1?ri(1,40)*5+(ri(0,1)?0:.5):t===2?ri(101,999):ri(1,99)},
+    // 해외직구·여행 결제: 대부분 $200 이하, 가끔 $1,500까지
+    pick:h=>!h?wp([[85,()=>3*ri(2,66)],[15,()=>3*ri(67,500)]])
+      :wp([[45,()=>ri(4,99)+.99],[35,()=>ri(5,200)],[12,()=>ri(201,499)+(ri(0,1)?.99:0)],[8,()=>ri(500,1500)]]),
     show:(u,a)=>{a.textContent=usdS(u)},
     truth:u=>u*RATE,
     parse:(g,u)=>g<1000&&u>=3?g*10000:g,
@@ -1336,8 +1340,12 @@ $('#azRegion').onchange=e=>{TTS.region=(e.target.value.trim()||'eastus').toLower
     return {s,val};
   }
   trainer('Dc',{
-    pick:h=>{if(!h)return [ri(1,20)*5000,ri(1,9)*10];const t=ri(0,2);
-      const p=t===0?ri(10,99)*1000-100:t===1?ri(11,199)*1000:ri(2,40)*500;return [p,ri(1,18)*5]},
+    // 쇼핑 가격: 대부분 10만 원 이하, 가끔 50만 원, 드물게 300만 원까지 / 할인은 10~50%가 흔함
+    pick:h=>{
+      const pct=h?wp([[80,()=>ri(1,10)*5],[20,()=>ri(11,14)*5]]):wp([[85,()=>ri(1,5)*10],[15,()=>ri(6,7)*10]]);
+      const p=!h?wp([[60,()=>ri(1,20)*5000],[25,()=>ri(11,50)*10000],[15,()=>ri(6,30)*100000]])
+        :wp([[60,()=>ri(5,99)*1000-pickArr([0,100,1000])],[25,()=>ri(100,499)*1000-pickArr([0,1000,10000])],[15,()=>ri(50,300)*10000-pickArr([0,10000,100000])]]);
+      return [p,pct]},
     show:([p,c],a,tag)=>{a.textContent=fmt(p)+'원';tag.textContent=c+'% 할인';tag.classList.remove('hide')},
     truth:([p,c])=>p*(100-c)/100,
     parse:(g,[p])=>g<1000&&p>=10000?g*10000:g,
@@ -1358,12 +1366,19 @@ $('#azRegion').onchange=e=>{TTS.region=(e.target.value.trim()||'eastus').toLower
     let hard=false,q=null,done=false;
     // 무게 표시: kg·g 섞기 (5kg / 5000g, 0.5kg / 500g)
     const disp=g=>(g>=500&&g%500===0&&ri(0,1))?(g/1000)+'kg':g+'g';
+    // 무게별로 현실적인 100g당 가격대 (고기·간식은 비싸고, 쌀·대용량은 쌈)
+    const per100=g=>g<=200?ri(8,60)*100:g<=600?ri(5,40)*100:g<=2000?ri(3,35)*100:g<=5000?ri(2,15)*100:ri(25,70)*10;
     function pick(){
-      let g,price;
-      if(!hard){g=[100,200,300,500,1000,2000,3000,5000,10000][ri(0,8)];price=ri(5,40)*100*g/100}
-      else{g=[30,40,60,80,150,250,350,450,600,750,1200,1500,2500,4000,5000][ri(0,14)];
-        price=Math.max(500,Math.round(ri(3,40)*100*g/100/100)*100);if(ri(0,1))price-=20}
-      return [g,price,disp(g)];
+      for(let t=0;t<50;t++){
+        const g=!hard?pickArr([100,200,300,400,500,600,1000,2000,3000,5000,10000])
+          :pickArr([40,80,150,180,250,350,450,750,1200,1500,2500,4000,5000,10000]);
+        let price=per100(g)*g/100;
+        if(hard){price=Math.max(500,Math.round(price/100)*100);price-=pickArr([0,20,100])}
+        if(price>100000||price<500)continue;
+        if(price>50000&&Math.random()>.1)continue; // 5만 원 넘는 건 가끔만
+        return [g,price,disp(g)];
+      }
+      return [500,8000,'500g'];
     }
     function newQ(focus){
       let v,t=0;do{v=pick()}while(q&&v[0]===q[0]&&v[1]===q[1]&&++t<20);
@@ -1413,15 +1428,17 @@ $('#azRegion').onchange=e=>{TTS.region=(e.target.value.trim()||'eastus').toLower
   const PY=400/121; // 1평 = 3.3058㎡
   trainer('Py',{
     unit:'평',
-    pick:h=>h?[59,74,84,99,114,135][ri(0,5)]*(ri(0,2)?1:0)||ri(21,180):ri(3,15)*10,
-    show:(m,a)=>{a.textContent=m+'㎡'},
+    // 집 크기: 대부분 60평 이하(≈198㎡), 아주 가끔 100평·1,000평·10,000평대(땅)
+    pick:h=>!h?wp([[90,()=>ri(2,19)*10],[5,()=>ri(33,66)*10],[3,()=>ri(33,66)*100],[2,()=>ri(33,66)*1000]])
+      :wp([[55,()=>pickArr([33,49,59,74,84,99,101,114,135,155,184])],[35,()=>ri(20,198)],[5,()=>ri(331,660)],[3,()=>ri(3306,6611)],[2,()=>ri(33058,66116)]]),
+    show:(m,a)=>{a.textContent=m.toLocaleString('ko-KR')+'㎡'},
     truth:m=>m/PY,
     parse:g=>g,
     good:(g,t)=>Math.abs(g-t)/t<=.03,
     explain:{title:t=>'약 '+r1(t)+'평',how:(m,t)=>
-      '<span class="m">방법 1 (× 3 하고 0 하나 떼기)</span>'+m+' × 3 = '+(m*3)+' → 0 하나 떼기 = <strong>'+r1(m*.3)+'평</strong>'
-      +'<span class="m">방법 2 (3으로 나누고 10% 빼기)</span>'+m+' ÷ 3 = '+r1(m/3)+' → 10%('+r1(m/30)+') 빼기 = <strong>'+r1(m*.3)+'평</strong>'
-      +'<span class="m">정확히</span>'+m+' ÷ 3.3058 = <strong>'+r1(t)+'평</strong>'}
+      '<span class="m">방법 1 (× 3 하고 0 하나 떼기)</span>'+fmt(m)+' × 3 = '+fmt(m*3)+' → 0 하나 떼기 = <strong>'+r1(m*.3)+'평</strong>'
+      +'<span class="m">방법 2 (3으로 나누고 10% 빼기)</span>'+fmt(m)+' ÷ 3 = '+r1(m/3)+' → 10%('+r1(m/30)+') 빼기 = <strong>'+r1(m*.3)+'평</strong>'
+      +'<span class="m">정확히</span>'+fmt(m)+' ÷ 3.3058 = <strong>'+r1(t)+'평</strong>'}
   });
 
   $('#mcSeg').onclick=e=>{const b=e.target.closest('button');if(!b)return;

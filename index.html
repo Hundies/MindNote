@@ -291,7 +291,7 @@ textarea:focus,input:focus,select:focus{border-color:var(--g2);background:#fff}
     <div class="mc-res" aria-live="polite"><b></b><div class="mc-how"></div><button class="mc-next" type="button">다음 문제</button></div>
     <details class="mc-guide"><summary>계산하는 방법 보기</summary>
       <h3>핵심: 묶음 수부터 센다</h3>
-      <ul><li>100g 묶음 수 = 무게에서 0 두 개 떼기 <span class="ex">(500g → 5묶음, 1.5kg → 15묶음)</span></li><li>100g당을 구하면 10g당은 0 하나만 더 떼면 끝</li><li>가격은 먼저 깔끔하게 반올림 <span class="ex">(7,980원 → 8,000원)</span></li></ul>
+      <ul><li>100g 묶음 수 = g에서 0 두 개 떼기 <span class="ex">(500g → 5묶음, 5000g → 50묶음)</span></li><li>kg이면 × 10 <span class="ex">(5kg → 50묶음, 1.5kg → 15묶음)</span></li><li>100g당을 구하면 10g당은 0 하나만 더 떼면 끝</li><li>가격은 먼저 깔끔하게 반올림 <span class="ex">(7,980원 → 8,000원)</span></li></ul>
       <h3>방법 1 (묶음 수로 나누기)</h3>
       <ul><li>묶음 수를 센다</li><li>가격 ÷ 묶음 수</li><li class="ex">500g 8,000원 → 5묶음 → 8,000 ÷ 5 = 100g당 1,600원</li></ul>
       <h3>방법 2 (1kg으로 맞추고 0 떼기)</h3>
@@ -1355,34 +1355,37 @@ $('#azRegion').onchange=e=>{TTS.region=(e.target.value.trim()||'eastus').toLower
     const p=$('#mcUp'),amt=p.querySelector('.mc-amt'),board=p.querySelector('.mc-board'),
       ins=[...p.querySelectorAll('input')],res=p.querySelector('.mc-res'),st={n:0,ok:0,s:0};
     let hard=false,q=null,done=false;
+    // 무게 표시: kg·g 섞기 (5kg / 5000g, 0.5kg / 500g)
+    const disp=g=>(g>=500&&g%500===0&&ri(0,1))?(g/1000)+'kg':g+'g';
     function pick(){
-      if(!hard){const g=[100,200,300,400,500,1000][ri(0,5)];return [g,ri(5,40)*100*g/100]}
-      const g=[30,40,60,80,120,150,180,250,350,400,450,600,750,800,1200,1500,2000][ri(0,16)];
-      let price=Math.max(500,Math.round(ri(3,40)*100*g/100/100)*100);if(ri(0,1))price-=20;
-      return [g,price];
+      let g,price;
+      if(!hard){g=[100,200,300,500,1000,2000,3000,5000,10000][ri(0,8)];price=ri(5,40)*100*g/100}
+      else{g=[30,40,60,80,150,250,350,450,600,750,1200,1500,2500,4000,5000][ri(0,14)];
+        price=Math.max(500,Math.round(ri(3,40)*100*g/100/100)*100);if(ri(0,1))price-=20}
+      return [g,price,disp(g)];
     }
     function newQ(focus){
       let v,t=0;do{v=pick()}while(q&&v[0]===q[0]&&v[1]===q[1]&&++t<20);
-      q=v;done=false;amt.textContent=wS(q[0])+' '+fmt(q[1])+'원';
+      q=v;done=false;amt.textContent=fmt(q[1])+'원 / '+q[2];
       ins.forEach(i=>{i.value='';i.style.borderColor=''});res.className='mc-res';
       board.classList.remove('pop');void board.offsetWidth;board.classList.add('pop');
       if(focus)ins[0].focus({preventScroll:true});
     }
     function how(){
-      const [g,pr0]=q,pr=nice(pr0),n=g/100;
+      const [g,pr0,w]=q,pr=nice(pr0),n=g/100;
       if(g<100){const m=g/10; // 100g보다 작으면 10g 묶음부터
-        return '<span class="m">방법 (10g 묶음부터)</span>'+wS(g)+' → 10g이 <strong>'+m+'묶음</strong><br>'
+        return '<span class="m">방법 (10g 묶음부터)</span>'+w+' → 10g이 <strong>'+m+'묶음</strong><br>'
           +(pr!==pr0?fmt(pr0)+'원 → 반올림 '+fmt(pr)+'원<br>':'')
           +fmt(pr)+' ÷ '+m+' = <strong>10g당 '+fmt(pr/m)+'원</strong>'
           +'<span class="m">100g당</span>10g당에 0 하나 붙이기 → <strong>100g당 '+fmt(pr/m*10)+'원</strong>';
       }
-      let o='<span class="m">방법 1 (묶음 수로 나누기)</span>'+wS(g)+' → 100g이 <strong>'+num(n)+'묶음</strong><br>'
+      let o='<span class="m">방법 1 (묶음 수로 나누기)</span>'+(w.endsWith('kg')?w+' = '+g+'g':w)+' → 100g이 <strong>'+num(n)+'묶음</strong><br>'
         +(pr!==pr0?fmt(pr0)+'원 → 반올림 '+fmt(pr)+'원<br>':'')
         +fmt(pr)+' ÷ '+num(n)+' = <strong>100g당 '+fmt(pr/n)+'원</strong>'
         +'<span class="m">방법 2 (1kg으로 맞추고 0 떼기)</span>';
-      if(1000%g===0){const f=1000/g;o+=wS(g)+' × '+f+' = 1kg<br>'+fmt(pr)+' × '+f+' = '+fmt(pr*f)+'원 → 0 하나 떼기 = <strong>100g당 '+fmt(pr*f/10)+'원</strong>'}
-      else if(g%1000===0){const f=g/1000;o+=wS(g)+' ÷ '+f+' = 1kg<br>'+fmt(pr)+' ÷ '+f+' = '+fmt(pr/f)+'원 → 0 하나 떼기 = <strong>100g당 '+fmt(pr/f/10)+'원</strong>'}
-      else o+=wS(g)+'은 1kg으로 딱 안 맞아서 방법 1이 편해';
+      if(1000%g===0){const f=1000/g;o+=w+' × '+f+' = 1kg<br>'+fmt(pr)+' × '+f+' = '+fmt(pr*f)+'원 → 0 하나 떼기 = <strong>100g당 '+fmt(pr*f/10)+'원</strong>'}
+      else if(g%1000===0){const f=g/1000;o+=w+' ÷ '+f+' = 1kg<br>'+fmt(pr)+' ÷ '+f+' = '+fmt(pr/f)+'원 → 0 하나 떼기 = <strong>100g당 '+fmt(pr/f/10)+'원</strong>'}
+      else o+=w+'은 1kg으로 딱 안 맞아서 방법 1이 편해';
       return o+'<span class="m">10g당</span>100g당에서 0 하나 더 떼기 → <strong>10g당 '+fmt(pr/n/10)+'원</strong>';
     }
     p.querySelector('form').onsubmit=e=>{

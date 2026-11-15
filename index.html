@@ -76,7 +76,7 @@ h1{font-family:'Playfair Display',Georgia,serif;font-size:36px;margin:0;font-wei
 .stat{flex:1;background:#fff;border:2px solid transparent;border-radius:14px;padding:10px 4px;text-align:center;color:var(--tx)}
 .stat b{display:block;font-size:20px}
 .stat small{color:var(--sub);font-size:12px}
-.stat.k b{color:var(--gd)}.stat.u b{color:var(--redd)}
+.stat.k b{color:var(--gd)}.stat.u b{color:var(--redd)}.stat.h b{color:#C98A12}
 .stat.on{border-color:var(--g2)}
 .sum .stats{margin-top:14px}
 .kv{display:flex;justify-content:space-between;font-size:14px;padding:6px 0}
@@ -190,6 +190,7 @@ h1{font-family:'Playfair Display',Georgia,serif;font-size:36px;margin:0;font-wei
 .dot{width:8px;height:8px;border-radius:50%;background:#E3E6E4}
 .dot.k{background:var(--g2)}
 .dot.u{background:var(--red)}
+.dot.h{background:#F2B84B}
 
 /* 학습 */
 .st-top{display:flex;align-items:center;justify-content:space-between;padding:12px 16px}
@@ -203,6 +204,7 @@ h1{font-family:'Playfair Display',Georgia,serif;font-size:36px;margin:0;font-wei
 .stamp{position:absolute;left:50%;z-index:5;transform:translateX(-50%);padding:8px 18px;border-radius:999px;font-size:15px;font-weight:800;opacity:0;pointer-events:none;white-space:nowrap}
 .stamp.up{top:-46px;background:var(--g2);color:#fff}
 .stamp.dn{bottom:-46px;background:var(--red);color:#fff}
+.stamp.md{top:-46px;background:#F2B84B;color:#fff}
 .swhint{text-align:center;font-size:12px;color:#b2bbb6;padding:0 16px}
 .spk{position:absolute;top:12px;right:12px;width:40px;height:40px;border:0;border-radius:50%;background:var(--gl);color:var(--gd);display:grid;place-items:center;z-index:2}
 .face.b .spk{background:#fff}
@@ -227,6 +229,10 @@ h1{font-family:'Playfair Display',Georgia,serif;font-size:36px;margin:0;font-wei
 .btn{flex:1;border:0;border-radius:16px;padding:17px;font-size:17px;font-weight:700}
 .btn.main,.btn.yes{background:var(--g2);color:#fff}
 .btn.no{background:var(--redl);color:var(--redd)}
+.btn.mid{background:#FFF4DC;color:#C98A12}
+.btn.sym{padding:10px 6px;line-height:1.1}
+.btn.sym b{display:block;font-size:26px;font-weight:800}
+.btn.sym small{display:block;font-size:12px;font-weight:700;margin-top:3px;opacity:.85}
 .btn.ghost{background:#F3F5F4;color:var(--tx)}
 
 /* 입력 시트 */
@@ -377,7 +383,7 @@ textarea:focus,input:focus,select:focus{border-color:var(--g2);background:#fff}
   </div>
   <div class="sec-t">초기화</div>
   <div class="pad set-list">
-    <button id="resetAllKnown">학습 기록 전체 초기화<span>카드는 두고 알아요/모름·틀린 횟수만 지움</span></button>
+    <button id="resetAllKnown">학습 기록 전체 초기화<span>카드는 두고 ○△X 기록만 지움</span></button>
     <button id="wipeAll" class="red">모든 데이터 삭제<span>카테고리와 카드 전부 삭제</span></button>
   </div>
   <input type="file" id="importFile" accept="application/json,.json" class="hide">
@@ -397,13 +403,14 @@ textarea:focus,input:focus,select:focus{border-color:var(--g2);background:#fff}
   <section class="hero">
     <div class="stats" id="stats">
       <button class="stat" data-f="all"><b id="sTotal">0</b><small>전체</small></button>
-      <button class="stat k" data-f="known"><b id="sKnown">0</b><small>알아요</small></button>
-      <button class="stat u" data-f="unknown"><b id="sUnknown">0</b><small>모름</small></button>
+      <button class="stat k" data-f="known"><b id="sKnown">0</b><small>○ 알아요</small></button>
+      <button class="stat h" data-f="half"><b id="sHalf">0</b><small>△ 애매</small></button>
+      <button class="stat u" data-f="unknown"><b id="sUnknown">0</b><small>X 모름</small></button>
     </div>
     <button class="start" id="startBtn">학습 시작</button>
     <div class="opts" id="opts">
       <button class="opt" data-o="shuffle">섞기</button>
-      <button class="opt" data-o="onlyUnknown">모르는 것만</button>
+      <button class="opt" data-o="onlyUnknown">△·X만</button>
       <button class="opt" data-o="reverse">정답 먼저 보기</button>
     </div>
   </section>
@@ -434,7 +441,7 @@ textarea:focus,input:focus,select:focus{border-color:var(--g2);background:#fff}
   </div>
   <div class="barw"><div id="bar"></div></div>
   <div id="cardArea"></div>
-  <div class="swhint" id="swhint">위로 밀면 알아요 · 아래로 밀면 모름</div>
+  <div class="swhint" id="swhint">위로 밀면 ○ · 아래로 밀면 X · △는 버튼</div>
   <div id="ctrl"></div>
 </div>
 
@@ -492,7 +499,7 @@ textarea:focus,input:focus,select:focus{border-color:var(--g2);background:#fff}
     <label for="csName">이름</label>
     <input id="csName" type="text" enterkeyhint="done">
     <div class="cs-btns">
-      <button id="csReset">기록 초기화<span>카드는 두고 알아요/모름·틀린 횟수만 지움</span></button>
+      <button id="csReset">기록 초기화<span>카드는 두고 ○△X 기록만 지움</span></button>
       <button id="csWipe" class="red">카드 전체 삭제<span>카테고리는 두고 안의 카드만 모두 삭제</span></button>
     </div>
   </div>
@@ -544,8 +551,10 @@ function load(){
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){toast('저장 실패')}}
 function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(()=>t.classList.remove('on'),1600)}
 const inCur=c=>c.catId===cur;
-// 상태: known===true 알아요 / known===false 모름(학습 중 모름 누름) / null 아직 안 품
-const isK=c=>c.known===true,isU=c=>c.known===false;
+// 상태: known===true ○ 알아요 / 'half' △ 애매 / false X 모름 / null 아직 안 품
+const isK=c=>c.known===true,isU=c=>c.known===false,isH=c=>c.known==='half',notK=c=>isU(c)||isH(c);
+// 틀린 횟수 = X + △ (정답률에서 △는 틀린 걸로 셈)
+const missN=c=>(c.wrong||0)+(c.half||0);
 const catName=id=>(S.cats.find(x=>x.id===id)||{}).name||'미분류';
 const pct=(a,b)=>b?Math.round(a/b*100):0;
 function clozeHTML(text,mode){
@@ -584,12 +593,12 @@ function renderHome(){
   $('#gtip').classList.toggle('hide',!S.cats.length);
   if(!S.cats.length){$('#grid').innerHTML='<div class="empty">카테고리가 없어요<br>오른쪽 위 + 를 눌러 추가하세요</div>';return}
   $('#grid').innerHTML=S.cats.map(c=>{
-    const l=S.cards.filter(x=>x.catId===c.id),k=l.filter(isK).length,u=l.filter(isU).length;
+    const l=S.cards.filter(x=>x.catId===c.id),k=l.filter(isK).length,h=l.filter(isH).length,u=l.filter(isU).length;
     return `<div class="tw sw-row" data-id="${c.id}"><div class="clip">${ACTS}
       <div class="tile sw-c">
         <div class="t-row"><div class="t-name">${esc(c.name)}</div><div class="t-cnt">${l.length}장</div></div>
         <div class="t-bar"><i style="width:${pct(k,l.length)}%"></i></div>
-        <div class="t-sub">알아요 ${k} · 모름 ${u}</div>
+        <div class="t-sub">○ ${k} · △ ${h} · X ${u}</div>
       </div></div></div>`;
   }).join('');
 }
@@ -635,7 +644,7 @@ $('#csSave').onclick=()=>{
 };
 $('#csName').onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();$('#csSave').click()}};
 $('#csReset').onclick=async()=>{
-  const id=csId;if(!await ask({title:'기록 초기화',msg:`'${catName(id)}' 카드의 알아요/모름·틀린 횟수를 초기화할까요?`,okText:'초기화',danger:true}))return;
+  const id=csId;if(!await ask({title:'기록 초기화',msg:`'${catName(id)}' 카드의 ○△X 기록을 초기화할까요?`,okText:'초기화',danger:true}))return;
   S.cards.filter(x=>x.catId===id).forEach(resetRec);save();closeCatEdit();renderAll();toast('초기화됨');
 };
 $('#csWipe').onclick=async()=>{
@@ -782,17 +791,17 @@ function renderDeck(){
   if(!S.cats.some(c=>c.id===cur)){closeDeck();return}
   $('#dkTitle').textContent=catName(cur);
   const l=S.cards.filter(inCur),k=l.filter(isK).length;
-  $('#sTotal').textContent=l.length;$('#sKnown').textContent=k;$('#sUnknown').textContent=l.filter(isU).length;
+  $('#sTotal').textContent=l.length;$('#sKnown').textContent=k;$('#sHalf').textContent=l.filter(isH).length;$('#sUnknown').textContent=l.filter(isU).length;
   document.querySelectorAll('#stats .stat').forEach(b=>b.classList.toggle('on',b.dataset.f===filter));
   document.querySelectorAll('.opt').forEach(b=>b.classList.toggle('on',!!S.opt[b.dataset.o]));
-  const list=l.filter(c=>filter==='all'||(filter==='known'?isK(c):isU(c))).sort((a,b)=>b.created-a.created);
+  const list=l.filter(c=>filter==='all'||(filter==='known'?isK(c):filter==='half'?isH(c):isU(c))).sort((a,b)=>b.created-a.created);
   if(!list.length){$('#list').innerHTML=`<div class="empty">${filter==='all'?'아직 카드가 없어요<br>오른쪽 위 + 를 눌러 추가하세요':'해당하는 카드가 없어요'}</div>`;return}
   $('#list').innerHTML=list.map(c=>`<div class="sw-row it-row" data-id="${c.id}"><div class="clip">${ACTS}${itemHTML(c,false,'sw-c')}</div></div>`).join('');
 }
 function itemHTML(c,showCat,cls=''){
   return `<div class="item ${cls}" data-id="${c.id}">
     <div class="it-main">${c.type==='card'?`<div class="it-q">${esc(c.front)}</div><div class="it-a">${esc(c.back)}</div>`:`<div class="it-q">${clozeHTML(c.text,'list')}</div>`}${c.note?`<div class="it-note">${esc(c.note)}</div>`:''}</div>
-    <div class="it-side"><span class="badge ${c.type}">${c.type==='card'?'카드':'빈칸'}</span>${showCat?`<span class="it-cat">${esc(catName(c.catId))}</span>`:''}${c.wrong?`<span class="it-w">틀림 ${c.wrong}</span>`:''}<span class="dot${isK(c)?' k':isU(c)?' u':''}"></span></div>
+    <div class="it-side"><span class="badge ${c.type}">${c.type==='card'?'카드':'빈칸'}</span>${showCat?`<span class="it-cat">${esc(catName(c.catId))}</span>`:''}${missN(c)?`<span class="it-w">틀림 ${missN(c)}</span>`:''}<span class="dot${isK(c)?' k':isH(c)?' h':isU(c)?' u':''}"></span></div>
   </div>`;
 }
 function renderAll(){if(openTw&&!document.contains(openTw))openTw=null;renderHome();renderStats();renderSearch();renderDeck();openTw=null;openX=0}
@@ -800,7 +809,7 @@ function renderAll(){if(openTw&&!document.contains(openTw))openTw=null;renderHom
 $('#backBtn').onclick=closeDeck;
 $('#stats').onclick=e=>{const b=e.target.closest('.stat');if(!b)return;filter=b.dataset.f;renderDeck()};
 $('#opts').onclick=e=>{const b=e.target.closest('.opt');if(!b)return;S.opt[b.dataset.o]=!S.opt[b.dataset.o];save();renderDeck()};
-function resetRec(c){c.known=null;c.right=0;c.wrong=0}
+function resetRec(c){c.known=null;c.right=0;c.wrong=0;c.half=0}
 
 /* ---------- 하단 탭 ---------- */
 $('#tabbar').onclick=e=>{
@@ -816,30 +825,30 @@ $('#tabbar').onclick=e=>{
 /* ---------- 탭2: 통계 ---------- */
 const openStat=new Set();
 function detailHTML(l){
-  const right=l.reduce((a,c)=>a+(c.right||0),0),wrong=l.reduce((a,c)=>a+(c.wrong||0),0);
+  const sum=f=>l.reduce((a,c)=>a+(c[f]||0),0),right=sum('right'),half=sum('half'),wrong=sum('wrong'),tot=right+half+wrong;
   const cardN=l.filter(c=>c.type==='card').length;
-  const top=l.filter(c=>c.wrong).sort((a,b)=>b.wrong-a.wrong).slice(0,5);
+  const top=l.filter(missN).sort((a,b)=>missN(b)-missN(a)).slice(0,5);
   return `<div class="kv"><span>카드 / 빈칸</span><b>${cardN} / ${l.length-cardN}</b></div>
-    <div class="kv"><span>푼 횟수</span><b>${right+wrong}회</b></div>
-    <div class="kv"><span>정답률</span><b>${right+wrong?pct(right,right+wrong)+'%':'-'}</b></div>
-    <div class="kv"><span>틀린 횟수</span><b style="color:var(--redd)">${wrong}회</b></div>
-    <div class="wt">많이 틀린 카드</div>
-    ${top.length?top.map(c=>`<div class="wl"><span>${cardTitle(c)}</span><b>${c.wrong}회</b></div>`).join(''):'<div class="none">아직 틀린 카드가 없어요</div>'}`;
+    <div class="kv"><span>푼 횟수</span><b>${tot}회</b></div>
+    <div class="kv"><span>정답률 (○만 정답)</span><b>${tot?pct(right,tot)+'%':'-'}</b></div>
+    <div class="kv"><span>○ / △ / X 횟수</span><b><span style="color:var(--gd)">${right}</span> / <span style="color:#C98A12">${half}</span> / <span style="color:var(--redd)">${wrong}</span></b></div>
+    <div class="wt">많이 틀린 카드 (△ 포함)</div>
+    ${top.length?top.map(c=>`<div class="wl"><span>${cardTitle(c)}</span><b>${missN(c)}회</b></div>`).join(''):'<div class="none">아직 틀린 카드가 없어요</div>'}`;
 }
 function renderStats(){
   const all=S.cards,k=all.filter(isK).length,p=pct(k,all.length);
   $('#statAll').innerHTML=`<div class="sum">
     <div class="sum-top"><div><span>전체 암기율</span><br><b>${p}%</b></div><span>카테고리 ${S.cats.length}개</span></div>
     <div class="t-bar"><i style="width:${p}%"></i></div>
-    <div class="stats"><div class="stat"><b>${all.length}</b><small>전체</small></div><div class="stat k"><b>${k}</b><small>알아요</small></div><div class="stat u"><b>${all.filter(isU).length}</b><small>모름</small></div></div>
+    <div class="stats"><div class="stat"><b>${all.length}</b><small>전체</small></div><div class="stat k"><b>${k}</b><small>○ 알아요</small></div><div class="stat h"><b>${all.filter(isH).length}</b><small>△ 애매</small></div><div class="stat u"><b>${all.filter(isU).length}</b><small>X 모름</small></div></div>
     <div class="sum-in">${detailHTML(all)}</div>
   </div>`;
   $('#statCats').innerHTML=S.cats.length?S.cats.map(c=>{
-    const l=all.filter(x=>x.catId===c.id),kk=l.filter(isK).length,uu=l.filter(isU).length,pp=pct(kk,l.length);
+    const l=all.filter(x=>x.catId===c.id),kk=l.filter(isK).length,hh=l.filter(isH).length,uu=l.filter(isU).length,pp=pct(kk,l.length);
     return `<div class="srow${openStat.has(c.id)?' open':''}" data-id="${c.id}">
       <button class="srow-h"><div class="t-row"><div class="t-name">${esc(c.name)}</div><div class="t-cnt" style="color:var(--gd);font-weight:700">${pp}%<span class="chev">▾</span></div></div>
         <div class="t-bar"><i style="width:${pp}%"></i></div>
-        <div class="t-sub"><span>${l.length}장</span><span>알아요 ${kk} · 모름 ${uu}</span></div></button>
+        <div class="t-sub"><span>${l.length}장</span><span>○ ${kk} · △ ${hh} · X ${uu}</span></div></button>
       <div class="srow-d"><div><div class="srow-in">${detailHTML(l)}</div></div></div>
     </div>`;
   }).join(''):'<div class="empty">카테고리가 없어요</div>';
@@ -861,7 +870,7 @@ function renderSearch(){
 $('#searchIn').oninput=renderSearch;
 $('#searchRes').onclick=e=>{const it=e.target.closest('.item');if(it)openCard(it.dataset.id)};
 $('#resetAllKnown').onclick=async()=>{
-  if(!await ask({title:'학습 기록 초기화',msg:'모든 카드의 알아요/모름·틀린 횟수를 지울까요? 카드는 그대로 남아요.',okText:'초기화',danger:true}))return;
+  if(!await ask({title:'학습 기록 초기화',msg:'모든 카드의 ○△X 기록을 지울까요? 카드는 그대로 남아요.',okText:'초기화',danger:true}))return;
   S.cards.forEach(resetRec);save();renderAll();toast('초기화됨');
 };
 $('#wipeAll').onclick=async()=>{
@@ -890,13 +899,13 @@ $('#importFile').onchange=e=>{
 };
 
 /* ---------- 학습 ---------- */
-let Q=[],qi=0,wrongList=[],right=0,revealed=false;
+let Q=[],qi=0,wrongList=[],right=0,halfN=0,revealed=false;
 function startStudy(cards){
   let q=cards?cards.slice():S.cards.filter(inCur);
-  if(!cards&&S.opt.onlyUnknown)q=q.filter(isU);
-  if(!q.length){toast(S.opt.onlyUnknown?'모르는 카드가 없어요':'카드가 없어요');return}
+  if(!cards&&S.opt.onlyUnknown)q=q.filter(notK);
+  if(!q.length){toast(S.opt.onlyUnknown?'△·X 카드가 없어요':'카드가 없어요');return}
   if(S.opt.shuffle)shuffle(q);
-  Q=q;qi=0;wrongList=[];right=0;
+  Q=q;qi=0;wrongList=[];right=0;halfN=0;
   $('#study').classList.add('open');showCard();
 }
 const SPK='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H3v6h3l5 4z" fill="currentColor"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg>';
@@ -1006,7 +1015,7 @@ function showCard(){
     const plain=c.text.replace(/\[([^\]]+)\]/g,'$1');
     inner=`<div class="cz"><div class="lbl">빈칸 채우기</div>${spkBtn(plain,'hide')}<div class="cz-txt">${clozeHTML(c.text,'study')}</div><div class="hide" id="czNote">${note}</div><div class="tap">빈칸을 탭하면 하나씩 열려요</div></div>`;
   }
-  $('#cardArea').innerHTML=`<div class="swc enter" id="swc"><div class="stamp up">알아요</div><div class="stamp dn">모름</div>${inner}</div>`;
+  $('#cardArea').innerHTML=`<div class="swc enter" id="swc"><div class="stamp up">○ 알아요</div><div class="stamp md">△ 애매</div><div class="stamp dn">X 모름</div>${inner}</div>`;
   $('#swhint').classList.remove('hide');
   setControls();
 }
@@ -1018,7 +1027,7 @@ function reveal(){
 }
 function setControls(){
   $('#ctrl').innerHTML=revealed
-    ?`<button class="btn no" data-a="no">모름</button><button class="btn yes" data-a="yes">알아요</button>`
+    ?`<button class="btn no sym" data-a="no"><b>X</b><small>모름</small></button><button class="btn mid sym" data-a="half"><b>△</b><small>애매</small></button><button class="btn yes sym" data-a="yes"><b>○</b><small>알아요</small></button>`
     :`<button class="btn main" data-a="show">정답 보기</button>`;
 }
 let busy=false;
@@ -1027,24 +1036,26 @@ function fly(ok,fromY=0){
   const el=$('#swc');
   if(!el){answer(ok);return}
   el.classList.remove('enter');
-  const st=el.querySelector(ok?'.stamp.up':'.stamp.dn');st.style.transition='opacity .15s';st.style.opacity=1;
+  const st=el.querySelector(ok===true?'.stamp.up':ok==='half'?'.stamp.md':'.stamp.dn');st.style.transition='opacity .15s';st.style.opacity=1;
   el.style.transition='none';el.style.transform=`translateY(${fromY}px)`;
   el.getBoundingClientRect();
   const H=window.innerHeight;
   el.style.transition='transform .42s cubic-bezier(.3,.6,.2,1), opacity .42s ease';
-  el.style.transform=`translateY(${ok?-H:H}px) scale(.9)`;el.style.opacity='0';
+  el.style.transform=`translateY(${ok===false?H:-H}px) scale(.9)`;el.style.opacity='0';
   setTimeout(()=>answer(ok),330);
 }
 function answer(ok){
   const c=Q[qi];c.known=ok;c.last=Date.now();
-  if(ok){c.right=(c.right||0)+1;right++}else{c.wrong=(c.wrong||0)+1;wrongList.push(c)}
+  if(ok===true){c.right=(c.right||0)+1;right++}
+  else if(ok==='half'){c.half=(c.half||0)+1;halfN++;wrongList.push(c)}
+  else{c.wrong=(c.wrong||0)+1;wrongList.push(c)}
   save();
   qi++;qi>=Q.length?finish():showCard();
 }
 function finish(){
   $('#bar').style.width='100%';$('#prog').textContent='완료';busy=false;$('#swhint').classList.add('hide');
-  $('#cardArea').innerHTML=`<div class="result"><b>${pct(right,Q.length)}%</b><p>알아요 ${right} · 모름 ${wrongList.length}</p></div>`;
-  $('#ctrl').innerHTML=(wrongList.length?`<button class="btn no" data-a="retry">모르는 것 다시 (${wrongList.length})</button>`:'')+`<button class="btn main" data-a="end">끝내기</button>`;
+  $('#cardArea').innerHTML=`<div class="result"><b>${pct(right,Q.length)}%</b><p>○ ${right} · △ ${halfN} · X ${wrongList.length-halfN}</p></div>`;
+  $('#ctrl').innerHTML=(wrongList.length?`<button class="btn no" data-a="retry">△·X 다시 (${wrongList.length})</button>`:'')+`<button class="btn main" data-a="end">끝내기</button>`;
 }
 function closeStudy(){sayId++;try{AU.pause()}catch(e){}if('speechSynthesis' in window)speechSynthesis.cancel();$('#study').classList.remove('open');renderAll()}
 
@@ -1110,7 +1121,7 @@ window.addEventListener('mouseup',()=>{if(swMouse){swMouse=false;swEnd()}});
 $('#ctrl').onclick=e=>{
   const a=e.target.closest('button')?.dataset.a;
   if(a==='show')reveal();
-  else if(a==='yes'||a==='no')fly(a==='yes');
+  else if(a==='yes'||a==='no'||a==='half')fly(a==='yes'?true:a==='half'?'half':false);
   else if(a==='retry')startStudy(wrongList);
   else if(a==='end')closeStudy();
 };
